@@ -1,0 +1,22 @@
+{
+  "name": "secret-santa",
+  "version": "1.0.0",
+  "description": "a secret secret-santa manager that draw secret-santa for you",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lowkahonn/Secret-Santa.git"
+  },
+  "author": "lowkahonn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lowkahonn/Secret-Santa/issues"
+  },
+  "homepage": "https://github.com/lowkahonn/Secret-Santa#readme",
+  "dependencies": {
+    "vue": "^2.6.12"
+  }
+}

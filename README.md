@@ -13,3 +13,9 @@ Backend - NodeJS (ExpressJS)
 [ ] Create event (eg. link for others to join)
 [ ] Draw name
 
+## Usage
+If you haven't install the dependencies yet, please run `npm install` in this directory.
+
+## Reference
+We can refer to this [repo](https://github.com/gothinkster/vue-realworld-example-app/) for the structure during development.
+
