@@ -13,11 +13,12 @@ Backend - NodeJS (ExpressJS)
 [ ] Create event (eg. link for others to join)
 [ ] Draw name
 
-## Usage
+## Run frontend only
 1. Please install `npm` or `node` if you haven't already.
-1. If you haven't install the dependencies yet, please run `npm install` in this directory.
-2. Run `npm run dev` and visit [http://localhost:8080/](http://localhost:8080/).
-3. Save your changes and the web app will hot-reload.
+2. If you haven't install the dependencies yet, please run `npm install` in this directory.
+3. Change directory into `vue` with `cd vue/`.
+4. Run `npm run dev` and visit [http://localhost:8080/](http://localhost:8080/).
+5. Save your changes and the web app will hot-reload.
 
 ## Reference
 We can refer to this [repo](https://github.com/gothinkster/vue-realworld-example-app/) for the structure during development.
