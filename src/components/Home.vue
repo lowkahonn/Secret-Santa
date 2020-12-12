@@ -4,18 +4,20 @@
       <div class="santa">
         <img src="../assets/secret-santa.png">
       </div>
-      <router-link :to="{ name: 'Registration' }" tag="button" class="register"> Register </router-link>
+      <v-btn
+        :to="{ name: 'Registration' }"
+        class="register"
+        color="primary"
+        elevation="2"
+        rounded
+        outlined
+      > Register </v-btn>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Home',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
-    }
-  }
+  name: 'Home'
 }
 </script>
 
@@ -52,11 +54,13 @@ img {
   max-height: 30%;
 }
 
+.v-btn:not(.v-btn--round).v-size--default {
+  padding: 1.5rem;
+}
+
 .register {
-  padding: 0.5rem 2rem;
-  font-size: 1rem;
-  align-items: center;
-  border-radius: 1rem;
+  margin: 1rem 0rem;
+  font-size: 1.5rem;
 }
 
 @media screen and (max-width: 601px) {
@@ -68,5 +72,34 @@ img {
     max-width: 50%;
     max-height: 50%;
   }
+
+  .register {
+    font-size: 3vw;
+  }
+
+  .v-btn:not(.v-btn--round).v-size--default {
+    padding: 0 3vw;
+  }
 }
+
+@media screen and (min-width: 601px) and (max-width: 801px) {
+  .register {
+    font-size: 1.5vw;
+  }
+
+  .v-btn:not(.v-btn--round).v-size--default {
+    padding: 0 1.5vw;
+  }
+}
+
+@media screen and (min-width: 801px) and (max-width: 1080px) {
+  .register {
+    font-size: 2vw;
+  }
+
+  .v-btn:not(.v-btn--round).v-size--default {
+    padding: 0 2vw;
+  }
+}
+
 </style>
