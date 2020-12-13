@@ -2,13 +2,13 @@
   <div class="register">
     <p class="welcome-msg">Welcome to Secret Santa</p>
     <div class="profile-pic">
-      <v-btn @click="decreaseIndex()" elevation="2" class="arrow-button">
+      <v-btn @click="decreaseIndex()" rounded elevation="2">
         <v-icon size="50">mdi-menu-left</v-icon>
       </v-btn>
-      <v-avatar size="256">
+      <v-avatar size="50%">
         <img :src="avatars[avatarIndex]" v-bind:alt="avatars[0]">
       </v-avatar>
-      <v-btn @click="increaseIndex()" elevation="2">
+      <v-btn @click="increaseIndex()" rounded elevation="2">
         <v-icon size="50">mdi-menu-right</v-icon>
       </v-btn>
     </div>
@@ -93,6 +93,7 @@ export default {
 
 .selection-msg {
   font-weight: bold;
+  font-size: 2rem;
 }
 
 .form {
@@ -121,6 +122,14 @@ export default {
   margin: 20px;
 }
 
+.v-btn {
+  width: 80px;
+}
+
+.v-icon {
+  font-size: 25px;
+}
+
 .btn {
   background-color: cornflowerblue;
   border: none;
@@ -133,7 +142,48 @@ export default {
   cursor: pointer;
 }
 
-.arrow-btn {
-  margin: 20px, 20px;
+@media screen and (max-width: 601px) {
+  .welcome-msg {
+    font-size: 5vw;
+  }
+
+  .selection-msg {
+    font-size: 5vw;
+  }
+
+  .v-btn {
+    width: 50px;
+  }
+
+  .form-control {
+    font-size: 3vw;
+  }
+
+  .v-btn:not(.v-btn--round).v-size--default {
+    padding: 0 3vw;
+  }
+
+  .btn {
+    font-size: 3vw;
+  }
+}
+
+@media screen and (min-width: 601px) and (max-width: 801px) {
+  .v-btn {
+    width: 60px;
+  }
+  .form-control {
+    font-size: default;
+  }
+}
+
+@media screen and (min-width: 801px) and (max-width: 1080px) {
+  .v-btn {
+    width: 80px;
+  }
+
+  .form-control {
+    font-size: default;
+  }
 }
 </style>
