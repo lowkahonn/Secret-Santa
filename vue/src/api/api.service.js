@@ -1,12 +1,13 @@
-import Vue from 'vue'
 import axios from 'axios'
-import VueAxios from 'vue-axios'
 
-Vue.use(VueAxios, axios)
-Vue.axios.defaults.baseURL = 'http://localhost:3000/'
+axios.defaults.baseURL = 'http://localhost:3000/'
+axios.defaults.headers.post['Content-Type'] = 'application/json'
 const ApiService = {
   register (params) {
-    return Vue.axios.post('register', params)
+    return axios.post('register', params)
+  },
+  login (params) {
+    return axios.post('login', params)
   }
 }
 

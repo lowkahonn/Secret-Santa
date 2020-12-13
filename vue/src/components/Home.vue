@@ -4,20 +4,53 @@
       <div class="santa">
         <img src="../assets/secret-santa.png">
       </div>
-      <v-btn
-        :to="{ name: 'Registration' }"
-        class="register"
-        color="primary"
-        elevation="2"
-        rounded
-        outlined
-      > Register </v-btn>
+      <form @submit.prevent="login()" class="form">
+        <fieldset class="form-group">
+          <input class="form-control" type="text" v-model="username" placeholder="Username"/>
+        </fieldset>
+        <fieldset class="form-group">
+          <input class="form-control" type="password" v-model="password" placeholder="Password"/>
+        </fieldset>
+        <div v-if="error" class="error">
+          The username or password is incorrect.
+        </div>
+        <button class="btn">Login</button>
+      </form>
+      <div class="register">
+        Don't have an account yet?
+        <router-link
+          :to="{ name: 'Registration' }"
+          class="sign-up"
+        >Sign up</router-link>
+      </div>
   </div>
 </template>
 
 <script>
+import ApiService from '@/api/api.service'
 export default {
-  name: 'Home'
+  name: 'Home',
+  data () {
+    return {
+      username: '',
+      password: '',
+      error: false
+    }
+  },
+  methods: {
+    async login () {
+      const data = {
+        username: this.username,
+        password: this.password
+      }
+      let res = await ApiService.login(data)
+      if (res.data && res.data.result) {
+        this.$router.push({ name: 'Profile' })
+      } else {
+        this.error = true
+      }
+    }
+  }
 }
 </script>
 
@@ -50,17 +83,64 @@ export default {
 
 img {
   padding: 1rem;
-  max-width: 30%;
-  max-height: 30%;
+  max-width: 20%;
+  max-height: 20%;
 }
 
 .v-btn:not(.v-btn--round).v-size--default {
-  padding: 1.5rem;
+  padding: 1rem;
+}
+
+.login {
+  padding: 1rem;
+  font-size: 1rem;
 }
 
 .register {
   margin: 1rem 0rem;
-  font-size: 1.5rem;
+  font-size: 1rem;
+}
+
+.sign-up {
+  padding: 0rem;
+}
+
+.form {
+  margin: 1rem;
+}
+
+.form-group {
+  border: none;
+}
+
+.form-control {
+  border: none;
+  background-color: white;
+  border-bottom: 2px solid darkslategray;
+  padding: 12px 20px;
+  margin: 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+
+.form-control:focus {
+  background-color: lightblue;
+}
+
+.btn {
+  background-color: cornflowerblue;
+  border: none;
+  border-bottom: 2px solid darkblue;
+  border-radius: 5px;
+  color: white;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 20px 2px;
+  cursor: pointer;
+}
+
+.error {
+  color: red
 }
 
 @media screen and (max-width: 601px) {
