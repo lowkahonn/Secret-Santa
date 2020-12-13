@@ -20,6 +20,11 @@ export default new Router({
       path: '/profile',
       name: 'Profile',
       component: () => import('@/components/Profile')
+    },
+    {
+      path: '/create-room',
+      name: 'CreateRoom',
+      component: () => import('@/components/CreateRoom')
     }
   ]
 })

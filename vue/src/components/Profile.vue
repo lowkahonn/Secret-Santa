@@ -42,7 +42,7 @@
         </v-col>
       </v-row>
     <div>
-      <v-btn @click="createRoom()" class="btn-group" color="primary" rounded>Create Room</v-btn>
+      <v-btn :to="{ name: 'CreateRoom' }" class="btn-group" color="primary" rounded>Create Room</v-btn>
     </div>
     <div>
       <v-btn @click="joinRoom()" class="btn-group" color="primary" rounded>Join Room</v-btn>
@@ -59,7 +59,6 @@ export default {
       avatar: require('../assets/avatars/boy.png'),
       itemToAdd: '',
       maxItem: 10,
-      colors: ['green', 'purple', 'indigo', 'cyan', 'teal', 'orange'],
       wishlist: ['pen', 'pineappple', 'apple']
     }
   },
@@ -76,12 +75,10 @@ export default {
     remove (item) {
       this.wishlist.splice(this.wishlist.indexOf(item), 1)
       this.wishlist = [...this.wishlist]
+      this.updateUserData()
     },
     show () {
       console.log(this.wishlist)
-    },
-    createRoom () {
-      // to do
     },
     joinRoom () {
       // todo
