@@ -6,6 +6,7 @@ const client = new Client({
 })
 client.connect()
 
+let inited = false
 const USER_TABLE = 'users'
 const USER_TABLE_FIELDS = ['username', 'password', 'email']
 
@@ -25,6 +26,8 @@ async function insert(table, fields, values) {
 
 const DatabaseService = {
     async init() {
+        if (inited) return
+        inited = true
         return client.query('CREATE TABLE IF NOT EXISTS users (' +
             'id SERIAL PRIMARY KEY,' +
             'username VARCHAR(64) NOT NULL,' + 
@@ -57,4 +60,3 @@ const DatabaseService = {
 }
 
 module.exports = DatabaseService
-
