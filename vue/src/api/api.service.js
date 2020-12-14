@@ -8,6 +8,12 @@ const ApiService = {
   },
   login (params) {
     return axios.post('login', params)
+  },
+  createRoom (params) {
+    return axios.post('room/create', params)
+  },
+  join (params) {
+    return axios.post('room/join', params)
   }
 }
 

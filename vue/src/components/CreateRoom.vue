@@ -36,7 +36,7 @@
             </v-btn>
         </div>
         <br/>
-        <v-btn :to="{ name: 'Home' }" color="primary" rounded @click="createRoom()">
+        <v-btn color="primary" rounded @click="createRoom()">
           Create
         </v-btn>
       </div>
@@ -44,10 +44,13 @@
 </template>
 
 <script>
+import ApiService from '@/api/api.service'
 export default {
   name: 'CreateRoom',
+  props: ['usernameProp'],
   data () {
     return {
+      username: this.usernameProp,
       selectionIndex: 0,
       background: [],
       roomName: '',
@@ -59,6 +62,14 @@ export default {
     this.importAll(require.context('../assets/backgrounds/', false, /\.jpe?g$/))
   },
   methods: {
+    getDeadline () {
+      // TODO: get the date and time from DOM and parse into ISO string
+      // mock deadline at 10 secs later
+      let mock = new Date(Date.now() + 10000).toISOString()
+      let datetime = mock.split('T')
+      datetime[1] = datetime[1].split('.')[0]
+      return datetime.join(' ')
+    },
     importAll (r) {
       r.keys().forEach(key => (this.background.push(r(key))))
     },
@@ -69,8 +80,18 @@ export default {
     increaseIndex () {
       this.selectionIndex = (this.selectionIndex + 1) % this.background.length
     },
-    createRoom () {
-      // to do
+    async createRoom () {
+      let data = {
+        organizer: this.username,
+        deadline: this.getDeadline(),
+        budget: this.budget,
+        roomName: this.roomName
+      }
+      let res = await ApiService.createRoom(data)
+      if (res.data && res.data.result) {
+        // TODO: route to room page
+        alert(res.data.roomId)
+      }
     }
   }
 }

@@ -63,7 +63,7 @@ export default {
       }
       const res = await ApiService.register(data)
       if (res.data && res.data.result) {
-        this.$router.push({ name: 'Profile' })
+        this.$router.push({ name: 'Profile', params: { usernameProp: this.username } })
       }
     }
   }

@@ -19,12 +19,14 @@ export default new Router({
     {
       path: '/profile',
       name: 'Profile',
-      component: () => import('@/components/Profile')
+      component: () => import('@/components/Profile'),
+      props: true
     },
     {
       path: '/create-room',
       name: 'CreateRoom',
-      component: () => import('@/components/CreateRoom')
+      component: () => import('@/components/CreateRoom'),
+      props: true
     }
   ]
 })

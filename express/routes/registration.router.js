@@ -14,7 +14,7 @@ router.post('/', async function (req, res) {
         res.sendStatus(400)
     }
     let valid = await db.checkUsernameValid(username)
-    if (!valid) {
+    if (!valid || valid == null) {
         res.send({ result: false })
         return
     }

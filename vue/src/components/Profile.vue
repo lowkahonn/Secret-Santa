@@ -1,90 +1,58 @@
 <template>
   <div class="profile">
-    <p class="header-msg">Login successfully! <br /> Now add items into your wishlist!</p>
+    <p class="header-msg">Login successfully! <br /></p>
     <div class="profile-pic">
       <v-avatar size="50%">
         <img :src=avatar>
       </v-avatar>
-      <p class="username">{{username}}</p>
+      <p class="username">{{ username }}</p>
     </div>
-    <p><strong>Wish List (Max {{maxItem}} items)</strong>&nbsp;</p>
-    <v-row justify="center" class="wishlist">
-      <v-chip-group
-      column
-      >
-        <v-chip
-          color="red"
-          v-for="item in wishlist"
-          :key="item"
-          close
-          @click:close="remove(item)"
-        >
-          <v-icon left color="white">
-              mdi-gift
-          </v-icon>
-          <strong>{{ item }}</strong>&nbsp;
-        </v-chip>
-      </v-chip-group>
-    </v-row>
-    <v-row class="input">
-        <v-col cols="12">
-          <v-text-field
-            v-model="itemToAdd"
-            append-outer-icon="mdi-plus-box"
-            solo
-            clear-icon="mdi-close-circle"
-            label="What do you want for this Christmas?"
-            type="text"
-            clearable
-            @click:append-outer="addItem()"
-            @click:clear="clearMessage()"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-    <div>
-      <v-btn :to="{ name: 'CreateRoom' }" class="btn-group" color="primary" rounded>Create Room</v-btn>
+    <div v-if="!joinRoom">
+      <v-btn :to="{ name: 'CreateRoom', params: { usernameProp: username } }" class="btn-group" color="primary" rounded>Organize a Party</v-btn>
     </div>
-    <div>
-      <v-btn @click="joinRoom()" class="btn-group" color="primary" rounded>Join Room</v-btn>
+    <div v-else>
+      <fieldset class="form-group">
+        <input class="form-control" type="text" v-model="invitationCode" placeholder="Invitation code"/>
+      </fieldset>
+    </div>
+    <div v-if="!joinRoom">
+      <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Join a Party</v-btn>
+    </div>
+    <div v-else class="join">
+      <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Back</v-btn>
+      <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
     </div>
   </div>
 </template>
 
 <script>
+import ApiService from '@/api/api.service'
 export default {
   name: 'Profile',
+  props: ['usernameProp'],
   data () {
     return {
-      username: 'Stanley',
+      username: this.usernameProp,
       avatar: require('../assets/avatars/boy.png'),
-      itemToAdd: '',
-      maxItem: 10,
-      wishlist: ['pen', 'pineappple', 'apple']
+      invitationCode: '',
+      joinRoom: false
     }
   },
   methods: {
-    addItem () {
-      if (this.itemToAdd === '' || this.wishlist.indexOf(this.itemToAdd) !== -1) return
-      this.wishlist.push(this.itemToAdd)
-      this.updateUserData()
-      this.clearMessage()
+    toggleJoinParty () {
+      this.joinRoom = !this.joinRoom
     },
-    clearMessage () {
-      this.itemToAdd = ''
-    },
-    remove (item) {
-      this.wishlist.splice(this.wishlist.indexOf(item), 1)
-      this.wishlist = [...this.wishlist]
-      this.updateUserData()
-    },
-    show () {
-      console.log(this.wishlist)
-    },
-    joinRoom () {
-      // todo
-    },
-    updateUserData () {
-      // to do
+    async join () {
+      let data = {
+        invitationCode: this.invitationCode,
+        username: this.username
+      }
+      let res = await ApiService.join(data)
+      if (res.data && res.data.result) {
+        // TODO: route to room page
+      } else {
+        console.log(res.data)
+      }
     }
   },
   watch: {
@@ -129,17 +97,33 @@ export default {
 }
 
 .profile-pic {
-  background-color: white;
   align-items: center;
   margin-top: 1.5rem;
-  width: 100%;
+}
+
+.form-group {
+  border: none;
+}
+
+.form-control {
+  border: none;
+  background-color: white;
+  border-bottom: 2px solid darkslategray;
+  padding: 12px 20px;
+  margin: 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
 }
 
 .username {
-  background-color: cornflowerblue;
   text-align: center;
   font-weight: bold;
   font-size: 2rem;
+}
+
+.join {
+  display: inline-block;
+  align-items: center;
 }
 
 .btn-group {

@@ -6,3 +6,5 @@ Backlog
 5. Handle registration fail.
 6. Issue JWT on backend on login.
 7. Store JWT token into localStorage and retrieve it automatically
+8. create room parse timestamp -> cronjob
+9. nodemail smtp
