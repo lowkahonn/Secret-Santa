@@ -10,7 +10,8 @@ let inited = false
 const USER_TABLE = 'users'
 const ROOMS_TABLE = 'rooms'
 const USER_TABLE_FIELDS = ['username', 'password', 'email']
-const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
+const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'budget']
+const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
 
 async function query(table, fields, condition = null) {
     fields = fields.join(',')
@@ -123,15 +124,15 @@ const DatabaseService = {
     },
     async joinRoom(roomId, username) {
         let exists = checkIfUserExistsInRoom(username, roomId)
-        if (!exists.rows.length) {
+        if (!exists.rows) {
             await insert(getRoomTable(roomId), ['username'], [username])
         }
-        return await query(ROOMS_TABLE, ROOMS_TABLE_FIELDS, `room_id='${roomId}'`)
+        return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
     },
     async getRoomInfo(roomId, username) {
         let valid = await checkIfUserExistsInRoom(username, roomId)
         if (valid) {
-            return await query(ROOMS_TABLE, ROOMS_TABLE_FIELDS, `room_id='${roomId}'`)
+            return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
         }
         return null
     }
