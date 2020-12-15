@@ -1,4 +1,6 @@
 const { Client } = require('pg')
+const { scheduleJob } = require('node-schedule')
+const Mailer = require('../email/mailer.service')
 require('dotenv').config()
 
 const client = new Client({
@@ -10,6 +12,7 @@ let inited = false
 const USER_TABLE = 'users'
 const ROOMS_TABLE = 'rooms'
 const USER_TABLE_FIELDS = ['username', 'password', 'email']
+const ROOM_TABLE_FIELDS = ['username', 'email']
 const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'budget']
 const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
 
@@ -31,7 +34,8 @@ async function createRoomTable(roomId) {
     return await client.query(`CREATE TABLE room.room${roomId} (` +
         'id SERIAL PRIMARY KEY,' +
         'username VARCHAR(64) NOT NULL,' +
-        'FOREIGN KEY (username) REFERENCES users (username)' +
+        'email VARCHAR(128) NOT NULL,' +
+        'FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE' +
     ')')
 }
 
@@ -107,7 +111,18 @@ const DatabaseService = {
             await insert(ROOMS_TABLE, ROOMS_TABLE_FIELDS, values)
             // create the room in room schema and join the room
             await createRoomTable(data.roomId)
-            return await this.joinRoom(data.roomId, data.organizer)
+            let roomInfoQuery = await this.joinRoom(data.roomId, data.organizer, data.email)
+            let roomInfo = roomInfoQuery.rows[0]
+            // automatically convert to the javascript timezone?
+            let date = new Date(roomInfo.timezone)
+            let self = this
+            scheduleJob(date, async function () {
+                let users = await self.getAllUsersInRoom(roomInfo.room_id, roomInfo.organizer)
+                if (users.length) {
+                    await Mailer.sendMail(users, roomInfo)
+                }
+            })
+            return roomInfo
         } catch (e) {
             console.log(e) 
             return null
@@ -122,10 +137,10 @@ const DatabaseService = {
             return false
         }
     },
-    async joinRoom(roomId, username) {
+    async joinRoom(roomId, username, email) {
         let exists = checkIfUserExistsInRoom(username, roomId)
         if (!exists.rows) {
-            await insert(getRoomTable(roomId), ['username'], [username])
+            await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email])
         }
         return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
     },
@@ -133,6 +148,14 @@ const DatabaseService = {
         let valid = await checkIfUserExistsInRoom(username, roomId)
         if (valid) {
             return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
+        }
+        return null
+    },
+    async getAllUsersInRoom(roomId, username) {
+        let valid = await checkIfUserExistsInRoom(username, roomId)
+        if (valid) {
+            let q = await query(getRoomTable(roomId), ROOM_TABLE_FIELDS)
+            return q.rows
         }
         return null
     }

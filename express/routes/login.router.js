@@ -1,5 +1,5 @@
 const bcryptjs = require('bcryptjs')
-const db = require('../db/db.service')
+const db = require('../services/db/db.service')
 const express = require('express')
 const router = express.Router()
 
@@ -21,7 +21,7 @@ router.post('/', async function (req, res) {
         res.send({ result: false })
         return
     }
-    res.send({ result: true })
+    res.send({ result: true, email: user.email })
 })
 
 module.exports = router

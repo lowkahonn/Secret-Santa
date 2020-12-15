@@ -47,10 +47,11 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'CreateRoom',
-  props: ['usernameProp'],
+  props: ['usernameProp', 'emailProp'],
   data () {
     return {
       username: this.usernameProp,
+      email: this.emailProp,
       selectionIndex: 0,
       background: [],
       roomName: '',
@@ -83,6 +84,7 @@ export default {
     async createRoom () {
       let data = {
         organizer: this.username,
+        email: this.email,
         deadline: this.getDeadline(),
         budget: this.budget,
         roomName: this.roomName

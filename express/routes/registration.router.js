@@ -1,5 +1,5 @@
 const bcryptjs = require('bcryptjs')
-const db = require('../db/db.service')
+const db = require('../services/db/db.service')
 const express = require('express')
 const router = express.Router()
 

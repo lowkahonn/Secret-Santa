@@ -8,7 +8,16 @@
       <p class="username">{{ username }}</p>
     </div>
     <div v-if="!joinRoom">
-      <v-btn :to="{ name: 'CreateRoom', params: { usernameProp: username } }" class="btn-group" color="primary" rounded>Organize a Party</v-btn>
+      <v-btn :to="{
+        name: 'CreateRoom',
+        params: {
+          usernameProp: username,
+          emailProp: email
+        }}"
+        class="btn-group"
+        color="primary"
+        rounded
+      >Organize a Party</v-btn>
     </div>
     <div v-else>
       <fieldset class="form-group">
@@ -29,10 +38,11 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Profile',
-  props: ['usernameProp'],
+  props: ['usernameProp', 'emailProp'],
   data () {
     return {
       username: this.usernameProp,
+      email: this.emailProp,
       avatar: require('../assets/avatars/boy.png'),
       invitationCode: '',
       joinRoom: false
@@ -45,7 +55,8 @@ export default {
     async join () {
       let data = {
         invitationCode: this.invitationCode,
-        username: this.username
+        username: this.username,
+        email: this.email
       }
       let res = await ApiService.join(data)
       if (res.data && res.data.result) {

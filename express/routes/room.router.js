@@ -1,4 +1,4 @@
-const db = require('../db/db.service')
+const db = require('../services/db/db.service')
 const express = require('express')
 const router = express.Router()
 const { v4: uuidv4 } = require('uuid')
@@ -11,10 +11,11 @@ function generateUniqueId(length = 8) {
 
 router.post('/create', async function (req, res) {
     let roomName = req.body.roomName
+    let email = req.body.email
     let organizer = req.body.organizer
     let deadline = req.body.deadline
     let budget = req.body.budget
-    if (!organizer || !roomName || !deadline || !budget) {
+    if (!organizer || !roomName || !email || !deadline || !budget) {
         res.send({ result: false })
         return
     }
@@ -22,6 +23,7 @@ router.post('/create', async function (req, res) {
     let data = {
         roomId: generateUniqueId(),
         roomName,
+        email,
         organizer,
         deadline,
         budget
@@ -40,7 +42,8 @@ router.post('/create', async function (req, res) {
 router.post('/join', async function (req, res) {
     let roomId = req.body.invitationCode
     let username = req.body.username
-    if (!roomId || !username) {
+    let email = req.body.email
+    if (!roomId || !username || !email) {
         res.send({ result: false })
         return
     }
@@ -51,7 +54,7 @@ router.post('/join', async function (req, res) {
         return
     }
     try {
-        let q = await db.joinRoom(roomId, username)
+        let q = await db.joinRoom(roomId, username, email)
         if (!q.rows.length) {
             res.send({ result: false })
             return
