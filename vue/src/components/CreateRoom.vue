@@ -1,11 +1,12 @@
 <template>
-  <div class="create-room" :style="{ 'background-image': 'url(' + background[selectionIndex] + ')' }">
+  <div class="create-room">
       <p class="msg">Customize your room!</p>
       <div class="container">
         <div>
           <v-text-field
             v-model="roomName"
             solo
+            dense
             label="Room Name"
             type="text"
           ></v-text-field>
@@ -14,6 +15,7 @@
           <v-text-field
             v-model="budget"
             solo
+            dense
             label="Gift Budget"
             type="text"
           ></v-text-field>
@@ -22,21 +24,23 @@
           <v-text-field
             v-model="announceDate"
             solo
+            dense
             label="Announce Date"
             type="date"
           ></v-text-field>
         </div>
         <div class="background-selection">
-          <p class="background-selection" :style="{'background-color': 'darkslateblue'}">Background</p>
-          <v-btn width="50" @click="increaseIndex()" rounded elevation="2">
-            <v-icon size="50">mdi-menu-left</v-icon>
+          <strong>Room Background</strong>
+          <v-img :aspect-ratio="16/9" :src="background[selectionIndex]">
+          </v-img>
+          <v-btn class="arrow-btn" @click="increaseIndex()" rounded elevation="2">
+            <v-icon size="30">mdi-menu-left</v-icon>
           </v-btn>
-          <v-btn width="50" @click="increaseIndex()" rounded elevation="2">
-            <v-icon size="50">mdi-menu-right</v-icon>
-            </v-btn>
+          <v-btn class="arrow-btn" @click="increaseIndex()" rounded elevation="2">
+            <v-icon size="30">mdi-menu-right</v-icon>
+          </v-btn>
         </div>
-        <br/>
-        <v-btn color="primary" rounded @click="createRoom()">
+        <v-btn :to="{ name: 'Room' }" color="primary" rounded @click="createRoom()">
           Create
         </v-btn>
       </div>
@@ -105,9 +109,7 @@ export default {
   position: fixed;
   width: 100%;
   height: 100%;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background: url("../assets/snowing.gif") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -127,19 +129,44 @@ export default {
 .container {
   align-items: center;
   padding: 50px 50px;
+  max-width: 350px;
+  min-width: 280px;
 }
 
-.background-selection {
-  padding: 6px 6px;
-  color: white;
-  font-weight: bold;
-  background-color: lavender;
-  border-radius: 5px;
+.arrow-btn {
+  margin: 10px 10px;
 }
 
 @media screen and (max-width: 350px) {
   .msg {
     font-size: 1.5rem;
+  }
+
+  .container {
+    padding: 25px 25px;
+    min-width:150px;
+    width: 250px;
+  }
+
+  .arrow-btn{
+    margin: 5px 0px;
+  }
+}
+
+@media screen and (min-width: 650px) {
+  .msg {
+    font-size: 3rem;
+  }
+
+  .container {
+    padding: 50px 25px;
+    min-width:150px;
+    max-width: 800px;
+    width: 500px;
+  }
+
+  .arrow-btn{
+    margin: 20px 20px;
   }
 }
 </style>
