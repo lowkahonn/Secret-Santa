@@ -1,17 +1,15 @@
 <template>
   <div class="register">
     <p class="welcome-msg">Welcome to Secret Santa</p>
-    <div class="profile-pic">
-      <v-btn @click="decreaseIndex()" rounded elevation="2">
+    <v-row align="center" justify="center">
+      <button class="arrow-btn" @click="decreaseIndex()">
         <v-icon size="50">mdi-menu-left</v-icon>
-      </v-btn>
-      <v-avatar size="50%">
-        <img :src="avatars[avatarIndex]" v-bind:alt="avatars[0]">
-      </v-avatar>
-      <v-btn @click="increaseIndex()" rounded elevation="2">
+      </button>
+      <img class="avatar" :src="avatars[avatarIndex]" v-bind:alt="avatars[0]">
+      <button class="arrow-btn" @click="increaseIndex()">
         <v-icon size="50">mdi-menu-right</v-icon>
-      </v-btn>
-    </div>
+      </button>
+    </v-row>
     <p class="selection-msg">Choose your avatar!</p>
     <form @submit.prevent="onSubmit()" class="form">
       <fieldset class="form-group">
@@ -123,17 +121,19 @@ export default {
   background-color: lightblue;
 }
 
-.profile-pic {
-  align-items: center;
+.avatar-selection {
+  background-color: wheat;
   margin: 20px;
 }
 
-.v-btn {
-  width: 80px;
+.avatar{
+  width: 200px;
 }
 
-.v-icon {
-  font-size: 25px;
+.arrow-btn{
+  background-color: white;
+  border: none;
+  border-radius: 10px;
 }
 
 .btn {
@@ -153,43 +153,28 @@ export default {
     font-size: 5vw;
   }
 
+  .avatar {
+    max-width: 50%;
+    max-height: 50%;
+  }
+
   .selection-msg {
     font-size: 5vw;
   }
 
-  .v-btn {
-    width: 50px;
+  .form {
+    margin: 10px 10px;
   }
-
   .form-control {
-    font-size: 3vw;
+    font-size: 4vw;
   }
 
-  .v-btn:not(.v-btn--round).v-size--default {
-    padding: 0 3vw;
+  .arrow-btn{
+    transform: scale(0.8);
   }
 
   .btn {
-    font-size: 3vw;
-  }
-}
-
-@media screen and (min-width: 601px) and (max-width: 801px) {
-  .v-btn {
-    width: 60px;
-  }
-  .form-control {
-    font-size: default;
-  }
-}
-
-@media screen and (min-width: 801px) and (max-width: 1080px) {
-  .v-btn {
-    width: 80px;
-  }
-
-  .form-control {
-    font-size: default;
+    font-size: 4vw;
   }
 }
 </style>
