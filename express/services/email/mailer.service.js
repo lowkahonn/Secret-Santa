@@ -31,6 +31,7 @@ class Mailer {
             await transporter.sendMail(options)
             console.log(`sent to ${santa.email}`)
         }
+        return users
     }
 }
 

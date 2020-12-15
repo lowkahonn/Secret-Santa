@@ -30,11 +30,20 @@ async function insert(table, fields, values) {
     return await client.query(`INSERT INTO ${table} (${fields}) VALUES(${values})`)
 }
 
+async function update(table, columnValuePairs, condition = null) {
+    columnValuePairs = columnValuePairs.join(',')
+    if (condition != null) {
+        return await client.query(`UPDATE ${table} SET ${columnValuePairs} WHERE ${condition}`)
+    }
+    return await client.query(`UPDATE ${table} SET ${columnValuePairs}`)
+}
+
 async function createRoomTable(roomId) {
     return await client.query(`CREATE TABLE room.room${roomId} (` +
         'id SERIAL PRIMARY KEY,' +
         'username VARCHAR(64) NOT NULL,' +
         'email VARCHAR(128) NOT NULL,' +
+        'santa VARCHAR(64),' +
         'FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE' +
     ')')
 }
@@ -119,7 +128,12 @@ const DatabaseService = {
             scheduleJob(date, async function () {
                 let users = await self.getAllUsersInRoom(roomInfo.room_id, roomInfo.organizer)
                 if (users.length) {
-                    await Mailer.sendMail(users, roomInfo)
+                    let shuffledUsers = await Mailer.sendMail(users, roomInfo)
+                    for (var i = 0; i < shuffledUsers.length; i++) {
+                        let user = shuffledUsers[(i + 1) % shuffledUsers.length]
+                        let santa = shuffledUsers[i]
+                        await update(getRoomTable(roomInfo.room_id), [`santa = '${santa.username}'`], `username = '${user.username}'`)
+                    }
                 }
             })
             return roomInfo
