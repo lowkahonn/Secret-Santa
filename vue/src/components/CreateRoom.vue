@@ -40,7 +40,7 @@
             <v-icon size="30">mdi-menu-right</v-icon>
           </v-btn>
         </div>
-        <v-btn :to="{ name: 'Room' }" color="primary" rounded @click="createRoom()">
+        <v-btn color="primary" rounded @click="createRoom()">
           Create
         </v-btn>
       </div>
@@ -94,9 +94,15 @@ export default {
         roomName: this.roomName
       }
       let res = await ApiService.createRoom(data)
+      console.log(res.data)
       if (res.data && res.data.result) {
         // TODO: route to room page
-        alert(res.data.roomId)
+        this.$router.push({
+          name: 'Room',
+          params: {
+            roomInfoProp: res.data.roomInfo
+          }
+        })
       }
     }
   }

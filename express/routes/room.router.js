@@ -10,6 +10,7 @@ function generateUniqueId(length = 8) {
 }
 
 router.post('/create', async function (req, res) {
+    console.log(`/room/create`)
     let roomName = req.body.roomName
     let email = req.body.email
     let organizer = req.body.organizer
@@ -28,18 +29,21 @@ router.post('/create', async function (req, res) {
         deadline,
         budget
     }
-    let q = await db.createRoom(data)
-    if (!q) {
+    let roomInfo = await db.createRoom(data)
+    if (!roomInfo) {
         res.send({ result: false })
         return
     }
+    let members = await db.getAllUsersInRoom(data.roomId, organizer)
+    roomInfo.members = members
     res.send({ 
         result: true,
-        roomId: data.roomId
+        roomInfo: roomInfo
     })
 })
 
 router.post('/join', async function (req, res) {
+    console.log(`/room/join : ${req.body.invitationCode}`)
     let roomId = req.body.invitationCode
     let username = req.body.username
     let email = req.body.email
@@ -54,14 +58,13 @@ router.post('/join', async function (req, res) {
         return
     }
     try {
-        let q = await db.joinRoom(roomId, username, email)
-        if (!q.rows.length) {
+        let roomInfo = await db.joinRoom(roomId, username, email)
+        if (!roomInfo) {
             res.send({ result: false })
             return
         }
-        let roomInfo = q.rows[0]
-        roomInfo.deadline = roomInfo.timezone
-        delete roomInfo.timezone
+        let members = await db.getAllUsersInRoom(roomId, username)
+        roomInfo.members = members
         res.send({ result: true, roomInfo: roomInfo })
     } catch (e) {
         console.log(e)

@@ -17,6 +17,7 @@ const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'bu
 const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
 
 async function query(table, fields, condition = null) {
+    console.log(`[DatabaseService] Querying ${fields} from table ${table} with condition ${condition}`)
     fields = fields.join(',')
     if (condition != null) {
         return await client.query(`SELECT ${fields} FROM ${table} WHERE ${condition}`)
@@ -25,12 +26,14 @@ async function query(table, fields, condition = null) {
 }
 
 async function insert(table, fields, values) {
+    console.log(`[DatabaseService] Insert into ${fields} in table ${table} with ${values}`)
     fields = fields.join(',')
     values = values.map(v => `'${v}'`).join(',')
     return await client.query(`INSERT INTO ${table} (${fields}) VALUES(${values})`)
 }
 
 async function update(table, columnValuePairs, condition = null) {
+    console.log(`[DatabaseService] Update table ${table} with ${columnValuePairs} with condition ${condition}`)
     columnValuePairs = columnValuePairs.join(',')
     if (condition != null) {
         return await client.query(`UPDATE ${table} SET ${columnValuePairs} WHERE ${condition}`)
@@ -59,6 +62,7 @@ function getRoomTable(roomId) {
 const DatabaseService = {
     async init() {
         if (inited) return
+        console.log("[DatabaseService] init")
         await client.query(`SET TIME ZONE 'UTC'`)
         await client.query('CREATE TABLE IF NOT EXISTS users (' +
             'id SERIAL PRIMARY KEY,' +
@@ -120,19 +124,19 @@ const DatabaseService = {
             await insert(ROOMS_TABLE, ROOMS_TABLE_FIELDS, values)
             // create the room in room schema and join the room
             await createRoomTable(data.roomId)
-            let roomInfoQuery = await this.joinRoom(data.roomId, data.organizer, data.email)
-            let roomInfo = roomInfoQuery.rows[0]
+            let roomInfo = await this.joinRoom(data.roomId, data.organizer, data.email)
             // automatically convert to the javascript timezone?
-            let date = new Date(roomInfo.timezone)
+            let date = new Date(roomInfo.deadline)
             let self = this
+            console.log(`[DatabaseService] Scheduling job at ${date}`)
             scheduleJob(date, async function () {
-                let users = await self.getAllUsersInRoom(roomInfo.room_id, roomInfo.organizer)
+                let users = await self.getAllUsersInRoom(roomInfo.roomId, roomInfo.organizer)
                 if (users.length) {
                     let shuffledUsers = await Mailer.sendMail(users, roomInfo)
                     for (var i = 0; i < shuffledUsers.length; i++) {
                         let user = shuffledUsers[(i + 1) % shuffledUsers.length]
                         let santa = shuffledUsers[i]
-                        await update(getRoomTable(roomInfo.room_id), [`santa = '${santa.username}'`], `username = '${user.username}'`)
+                        await update(getRoomTable(roomInfo.roomId), [`santa = '${santa.username}'`], `username = '${user.username}'`)
                     }
                 }
             })
@@ -156,7 +160,18 @@ const DatabaseService = {
         if (!exists.rows) {
             await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email])
         }
-        return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
+        let q = await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
+        if (!q || !q.rows.length) {
+            return null
+        }
+        let roomInfo = q.rows[0]
+        roomInfo.roomId = roomInfo.room_id
+        roomInfo.roomName = roomInfo.room_name
+        roomInfo.deadline = roomInfo.timezone
+        delete roomInfo.room_id
+        delete roomInfo.room_name
+        delete roomInfo.timezone
+        return roomInfo
     },
     async getRoomInfo(roomId, username) {
         let valid = await checkIfUserExistsInRoom(username, roomId)

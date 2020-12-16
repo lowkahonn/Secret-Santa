@@ -15,7 +15,7 @@
         next-icon="mdi-arrow-right-drop-circle"
       >
         <v-slide-item
-          v-for="(m, index) in member"
+          v-for="(m, index) in members"
           :key="index"
           v-slot="{ active, toggle }"
         >
@@ -55,10 +55,10 @@
             justify="center"
           >
             <h3 class="title">
-              {{member[model].name}}
+              {{members[model].name}}
             </h3>
-            <h3 v-if="member[model].secretSanta == userName" class="title">
-              &nbsp;want a {{member[model].wish}} !
+            <h3 v-if="members[model].secretSanta == userName" class="title">
+              &nbsp;want a {{members[model].wish}} !
             </h3>
           </v-row>
         </v-sheet>
@@ -69,7 +69,7 @@
         <div class="col">
           <v-row justify="center" align="center">
             <img class="icon" src="../assets/budget.png">
-            <h3>&nbsp; Budget: {{roomBudget}}</h3>
+            <h3>&nbsp; Budget: {{budget}}</h3>
           </v-row>
         </div>
         <div class="col">
@@ -83,48 +83,40 @@
 <script>
 export default {
   name: 'Room',
+  props: ['roomInfoProp'],
   data () {
     return {
       model: null,
       userName: '',
       roomName: '',
-      roomBudget: 0,
+      budget: 0,
       announceDate: new Date(),
       background: require('../assets/snowing.gif'),
-      member: [],
+      members: [],
       avatarSize: this.getAvatarSize()
     }
   },
   created () {
-    this.fetchData()
   },
   mounted () {
     this.$nextTick(() => {
-      window.addEventListener('resize', this.onResize)
+      window.addEventListenser('resize', this.onResize)
     })
-  },
-  methods: {
-    fetchData () {
-      // sample data
-      function Member (name, avatar, wish, secretSanta) {
+    class Member {
+      constructor (name, avatar, wish, secretSanta) {
         this.name = name
         this.avatar = avatar
         this.wish = wish
         this.secretSanta = secretSanta
       }
-      var data = {
-        roomName: 'New Room',
-        background: 'background-0',
-        roomBudget: 100,
-        announceDate: new Date(new Date().getFullYear(), 11, 25), // christmas
-        member: [new Member('Stan', 'boy', 'A', 'na'), new Member('KO', 'snowman', 'B', 'na'), new Member('SYao', 'girl', 'C', 'na')]
-      }
-      this.roomName = data.roomName
-      this.background = require('../assets/backgrounds/' + data.background + '.jpeg')
-      this.roomBudget = data.roomBudget
-      this.announceDate = data.announceDate
-      this.member = data.member
-    },
+    }
+    let roomInfo = this.roomInfoProp
+    this.roomName = roomInfo.roomName
+    this.budget = roomInfo.budget
+    this.announceDate = roomInfo.deadline
+    this.members = [new Member('Stan', 'boy', 'A', 'na'), new Member('KO', 'snowman', 'B', 'na'), new Member('SYao', 'girl', 'C', 'na')]
+  },
+  methods: {
     sendInvitation () {
       // todo
     },

@@ -27,6 +27,12 @@ export default new Router({
       name: 'CreateRoom',
       component: () => import('@/components/CreateRoom'),
       props: true
+    },
+    {
+      path: '/room',
+      name: 'Room',
+      component: () => import('@/components/Room'),
+      props: true
     }
   ]
 })

@@ -12,7 +12,7 @@ class Mailer {
             }
         })
         users = shuffle(users)
-        let subject = `It is time to reveal your secret santa at room ${roomInfo.room_name}`
+        let subject = `It is time to reveal your secret santa at room ${roomInfo.roomName}`
         for (var i = 0; i < users.length; i++) {
             let user = users[(i + 1) % users.length]
             let santa = users[i]

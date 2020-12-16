@@ -60,7 +60,12 @@ export default {
       }
       let res = await ApiService.join(data)
       if (res.data && res.data.result) {
-        // TODO: route to room page
+        this.$router.push({
+          name: 'Room',
+          params: {
+            roomInfoProp: res.data.roomInfo
+          }
+        })
       } else {
         console.log(res.data)
       }

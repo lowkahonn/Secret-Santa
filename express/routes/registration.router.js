@@ -11,7 +11,8 @@ router.post('/', async function (req, res) {
     let password = req.body.password
     let email = req.body.email
     if (!username || !password || !email) {
-        res.sendStatus(400)
+        res.status(400).send({ result: false })
+        return
     }
     let valid = await db.checkUsernameValid(username)
     if (!valid || valid == null) {
