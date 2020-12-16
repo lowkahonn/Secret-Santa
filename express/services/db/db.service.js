@@ -11,10 +11,10 @@ client.connect()
 let inited = false
 const USER_TABLE = 'users'
 const ROOMS_TABLE = 'rooms'
-const USER_TABLE_FIELDS = ['username', 'password', 'email', 'rooms']
-const ROOM_TABLE_FIELDS = ['username', 'email']
-const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'budget']
-const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
+const USER_TABLE_FIELDS = ['username', 'password', 'email', 'avatar', 'rooms']
+const ROOM_TABLE_FIELDS = ['username', 'email', 'avatar']
+const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'budget', 'background']
+const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget', 'background']
 
 async function query(table, fields, condition = null) {
     console.log(`[DatabaseService] Querying ${fields} from table ${table} with condition ${condition}`)
@@ -46,6 +46,7 @@ async function createRoomTable(roomId) {
         'id SERIAL PRIMARY KEY,' +
         'username VARCHAR(64) NOT NULL,' +
         'email VARCHAR(128) NOT NULL,' +
+        'avatar VARCHAR(32) NOT NULL,' +
         'santa VARCHAR(64),' +
         'FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE' +
     ')')
@@ -84,6 +85,7 @@ const DatabaseService = {
             'username VARCHAR(64) NOT NULL,' + 
             'password VARCHAR(128) NOT NULL,' +
             'email VARCHAR(128) NOT NULL,' +
+            'avatar VARCHAR(32) NOT NULL,' +
             'rooms text[],' +
             'UNIQUE (username)' +
         ')')
@@ -93,7 +95,8 @@ const DatabaseService = {
             'room_name VARCHAR(64) NOT NULL,' +
             'organizer VARCHAR(64) NOT NULL,' + 
             'deadline TIMESTAMP NOT NULL,' +
-            'budget INTEGER NOT NULL' +
+            'budget INTEGER NOT NULL,' +
+            'background VARCHAR(32) NOT NULL' +
         ')')
         await client.query('CREATE SCHEMA IF NOT EXISTS room')
         inited = true
@@ -137,7 +140,8 @@ const DatabaseService = {
         values.push(data.username)
         values.push(data.password)
         values.push(data.email)
-        await insert(USER_TABLE, ['username', 'password', 'email'], values)
+        values.push(data.avatar)
+        await insert(USER_TABLE, ['username', 'password', 'email', 'avatar'], values)
     },
     async createRoom(data) {
         let values = []
@@ -146,12 +150,14 @@ const DatabaseService = {
         values.push(data.organizer)
         values.push(data.deadline)
         values.push(data.budget)
+        values.push(data.background)
         try {
             // store the room metadata
             await insert(ROOMS_TABLE, ROOMS_TABLE_FIELDS, values)
             // create the room in room schema and join the room
             await createRoomTable(data.roomId)
-            let roomInfo = await this.joinRoom(data.roomId, data.organizer, data.email)
+            let user = await this.getUser(data.organizer)
+            let roomInfo = await this.joinRoom(data.roomId, data.organizer, data.email, user.avatar)
             // automatically convert to the javascript timezone?
             let date = new Date(roomInfo.deadline)
             let self = this
@@ -182,10 +188,10 @@ const DatabaseService = {
             return false
         }
     },
-    async joinRoom(roomId, username, email) {
+    async joinRoom(roomId, username, email, avatar) {
         let exists = checkIfUserExistsInRoom(username, roomId)
         if (!exists.rows) {
-            await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email])
+            await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email, avatar])
             await update(USER_TABLE, [`rooms = rooms || '{${roomId}}'`], `username = '${username}'`)
         }
         return await queryRoomInfo(roomId)

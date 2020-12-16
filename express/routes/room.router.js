@@ -16,7 +16,8 @@ router.post('/create', async function (req, res) {
     let organizer = req.body.organizer
     let deadline = req.body.deadline
     let budget = req.body.budget
-    if (!organizer || !roomName || !email || !deadline || !budget) {
+    let background = req.body.background
+    if (!organizer || !roomName || !email || !deadline || !budget || !background) {
         res.send({ result: false })
         return
     }
@@ -27,7 +28,8 @@ router.post('/create', async function (req, res) {
         email,
         organizer,
         deadline,
-        budget
+        budget,
+        background
     }
     let roomInfo = await db.createRoom(data)
     if (!roomInfo) {
@@ -52,13 +54,14 @@ router.post('/join', async function (req, res) {
         return
     }
     await db.init()
-    let exists = await db.checkRoomExists(roomId)
-    if (!exists) {
+
+    let user = await db.getUser(username)
+    if (!user) {
         res.send({ result: false })
         return
     }
     try {
-        let roomInfo = await db.joinRoom(roomId, username, email)
+        let roomInfo = await db.joinRoom(roomId, username, email, user.avatar)
         if (!roomInfo) {
             res.send({ result: false })
             return

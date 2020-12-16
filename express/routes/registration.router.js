@@ -10,7 +10,8 @@ router.post('/', async function (req, res) {
     let username = req.body.username
     let password = req.body.password
     let email = req.body.email
-    if (!username || !password || !email) {
+    let avatar = req.body.avatar
+    if (!username || !password || !email || !avatar) {
         res.status(400).send({ result: false })
         return
     }
@@ -23,7 +24,8 @@ router.post('/', async function (req, res) {
     let data = {
         username,
         password: hash,
-        email
+        email,
+        avatar
     }
     try {
         await db.insertUser(data)

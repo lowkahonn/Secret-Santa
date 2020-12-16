@@ -50,6 +50,7 @@ export default {
           params: {
             usernameProp: res.data.user.username,
             emailProp: res.data.user.email,
+            avatarProp: res.data.user.avatar,
             roomsProp: res.data.user.rooms
           }
         })

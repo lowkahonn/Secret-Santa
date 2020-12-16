@@ -33,7 +33,7 @@
           <strong>Room Background</strong>
           <v-img :aspect-ratio="16/9" :src="background[selectionIndex]">
           </v-img>
-          <v-btn class="arrow-btn" @click="increaseIndex()" rounded elevation="2">
+          <v-btn class="arrow-btn" @click="decreaseIndex()" rounded elevation="2">
             <v-icon size="30">mdi-menu-left</v-icon>
           </v-btn>
           <v-btn class="arrow-btn" @click="increaseIndex()" rounded elevation="2">
@@ -77,9 +77,10 @@ export default {
     },
     importAll (r) {
       r.keys().forEach(key => (this.background.push(r(key))))
+      this.background.sort()
     },
     decreaseIndex () {
-      var index = (this.avatarIndex - 1)
+      var index = (this.selectionIndex - 1)
       this.selectionIndex = index < 0 ? this.background.length - 1 : index
     },
     increaseIndex () {
@@ -91,12 +92,11 @@ export default {
         email: this.email,
         deadline: this.getDeadline(),
         budget: this.budget,
-        roomName: this.roomName
+        roomName: this.roomName,
+        background: `background-${this.selectionIndex}.jpeg`
       }
       let res = await ApiService.createRoom(data)
-      console.log(res.data)
-      if (res.data && res.data.result) {
-        // TODO: route to room page
+      if (res.data && res.data.result && res.data.roomInfo) {
         this.$router.push({
           name: 'Room',
           params: {

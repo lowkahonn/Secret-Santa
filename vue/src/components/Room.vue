@@ -114,7 +114,10 @@ export default {
     this.roomName = roomInfo.roomName
     this.budget = roomInfo.budget
     this.announceDate = roomInfo.deadline
-    this.members = [new Member('Stan', 'boy', 'A', 'na'), new Member('KO', 'snowman', 'B', 'na'), new Member('SYao', 'girl', 'C', 'na')]
+    this.members = roomInfo.members.map(m => {
+      return new Member(m.username, m.avatar, m.wish, m.santa)
+    })
+    this.background = require(`../assets/backgrounds/${roomInfo.background}`)
   },
   methods: {
     sendInvitation () {
@@ -131,7 +134,7 @@ export default {
       else return 140
     },
     getImgURL (name) {
-      return require('../assets/avatars/' + name + '.png')
+      return require('../assets/avatars/' + name)
     },
     getShortName (name) {
       return name.substring(0, 4)

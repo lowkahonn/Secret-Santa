@@ -45,6 +45,7 @@ export default {
   methods: {
     importAll (avatars) {
       avatars.keys().forEach(key => (this.avatars.push(avatars(key))))
+      this.avatars.sort()
     },
     decreaseIndex () {
       var index = (this.avatarIndex - 1)
@@ -53,11 +54,18 @@ export default {
     increaseIndex () {
       this.avatarIndex = (this.avatarIndex + 1) % this.avatars.length
     },
+    getAvatarName () {
+      if (this.avatarIndex < 10) {
+        return `avatar-0${this.avatarIndex}.png`
+      }
+      return `avatar-${this.avatarIndex}.png`
+    },
     async onSubmit () {
       const data = {
         username: this.username,
         email: this.email,
-        password: this.password
+        password: this.password,
+        avatar: this.getAvatarName()
       }
       const res = await ApiService.register(data)
       if (res.data && res.data.result) {
@@ -65,7 +73,8 @@ export default {
           name: 'Profile',
           params: {
             usernameProp: this.username,
-            emailProp: this.email
+            emailProp: this.email,
+            avatarProp: data.avatar
           }
         })
       }
