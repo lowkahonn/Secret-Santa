@@ -38,11 +38,12 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Profile',
-  props: ['usernameProp', 'emailProp'],
+  props: ['usernameProp', 'emailProp', 'roomsProp'],
   data () {
     return {
       username: this.usernameProp,
       email: this.emailProp,
+      joinedRooms: this.roomsProp,
       avatar: require('../assets/avatars/boy.png'),
       invitationCode: '',
       joinRoom: false

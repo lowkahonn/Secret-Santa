@@ -21,7 +21,8 @@ router.post('/', async function (req, res) {
         res.send({ result: false })
         return
     }
-    res.send({ result: true, email: user.email })
+    delete user.password
+    res.send({ result: true, user })
 })
 
 module.exports = router

@@ -100,7 +100,7 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      window.addEventListenser('resize', this.onResize)
+      window.addEventListener('resize', this.onResize)
     })
     class Member {
       constructor (name, avatar, wish, secretSanta) {

@@ -11,7 +11,7 @@ client.connect()
 let inited = false
 const USER_TABLE = 'users'
 const ROOMS_TABLE = 'rooms'
-const USER_TABLE_FIELDS = ['username', 'password', 'email']
+const USER_TABLE_FIELDS = ['username', 'password', 'email', 'rooms']
 const ROOM_TABLE_FIELDS = ['username', 'email']
 const ROOMS_TABLE_FIELDS = ['room_id', 'room_name', 'organizer', 'deadline', 'budget']
 const ROOMS_TABLE_QUERY_FIELDS = ['room_id', 'room_name', 'organizer', `deadline::timestamp at time zone 'UTC'`, 'budget']
@@ -59,6 +59,21 @@ function getRoomTable(roomId) {
     return `room.room${roomId}`
 }
 
+async function queryRoomInfo(roomId) {
+    let q = await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
+    if (!q || !q.rows.length) {
+        return null
+    }
+    let roomInfo = q.rows[0]
+    roomInfo.roomId = roomInfo.room_id
+    roomInfo.roomName = roomInfo.room_name
+    roomInfo.deadline = roomInfo.timezone
+    delete roomInfo.room_id
+    delete roomInfo.room_name
+    delete roomInfo.timezone
+    return roomInfo
+}
+
 const DatabaseService = {
     async init() {
         if (inited) return
@@ -69,6 +84,7 @@ const DatabaseService = {
             'username VARCHAR(64) NOT NULL,' + 
             'password VARCHAR(128) NOT NULL,' +
             'email VARCHAR(128) NOT NULL,' +
+            'rooms text[],' +
             'UNIQUE (username)' +
         ')')
         await client.query('CREATE TABLE IF NOT EXISTS rooms (' +
@@ -88,7 +104,18 @@ const DatabaseService = {
             if (!q.rows.length) {
                 return null
             }
-            return q.rows[0]
+            let user = q.rows[0]
+            if (user.rooms) {
+                let rooms = []
+                for (var i = 0; i < user.rooms.length; i++) {
+                    let roomInfo = await queryRoomInfo(user.rooms[i])
+                    if (roomInfo) {
+                        rooms.push(roomInfo)
+                    }
+                }
+                user.rooms = rooms
+            }
+            return user
         } catch (e) {
             console.log(e)
             return null
@@ -110,7 +137,7 @@ const DatabaseService = {
         values.push(data.username)
         values.push(data.password)
         values.push(data.email)
-        await insert(USER_TABLE, USER_TABLE_FIELDS, values)
+        await insert(USER_TABLE, ['username', 'password', 'email'], values)
     },
     async createRoom(data) {
         let values = []
@@ -159,24 +186,14 @@ const DatabaseService = {
         let exists = checkIfUserExistsInRoom(username, roomId)
         if (!exists.rows) {
             await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email])
+            await update(USER_TABLE, [`rooms = rooms || '{${roomId}}'`], `username = '${username}'`)
         }
-        let q = await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
-        if (!q || !q.rows.length) {
-            return null
-        }
-        let roomInfo = q.rows[0]
-        roomInfo.roomId = roomInfo.room_id
-        roomInfo.roomName = roomInfo.room_name
-        roomInfo.deadline = roomInfo.timezone
-        delete roomInfo.room_id
-        delete roomInfo.room_name
-        delete roomInfo.timezone
-        return roomInfo
+        return await queryRoomInfo(roomId)
     },
     async getRoomInfo(roomId, username) {
         let valid = await checkIfUserExistsInRoom(username, roomId)
         if (valid) {
-            return await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS, `room_id='${roomId}'`)
+            return await queryRoomInfo(roomId)
         }
         return null
     },
