@@ -85,10 +85,8 @@ export default {
       }
     },
     getDeadline () {
-      // TODO: get the date and time from DOM and parse into ISO string
-      // mock deadline at 10 secs later
-      let mock = new Date(Date.now() + 10000).toISOString()
-      let datetime = mock.split('T')
+      let date = new Date(this.announceDate).toISOString()
+      let datetime = date.split('T')
       datetime[1] = datetime[1].split('.')[0]
       return datetime.join(' ')
     },

@@ -4,7 +4,7 @@
       <img src="../assets/wood-sign.png" width="200">
       <div class="room-name"> {{roomName}}</div>
     </div>
-    <p class="countdown">Time Remaining: {{getRemainingDay()}}  days</p>
+    <p class="countdown">Time Remaining<br>{{ countdownDay }} days {{ countdownHour }} hours {{ countdownMin }} mins {{ countdownSec }} secs</p>
     <v-row justify="center">
       <v-slide-group
         v-model="selectedIndex"
@@ -77,9 +77,7 @@
           <button class="btn-group" @click="sendInvitation()">Invite friends</button>
         </div>
         <div class="col">
-          <router-link to="/profile">
-            <button class="btn-group">Back to Profile</button>
-          </router-link>
+          <button @click="back()" class="btn-group">Back to Profile</button>
         </div>
       </v-col>
     </v-row>
@@ -96,10 +94,16 @@ export default {
       username: '',
       roomName: '',
       budget: 0,
-      announceDate: new Date(),
+      announceDate: '',
       background: require('../assets/snowing.gif'),
       members: [],
-      avatarSize: this.getAvatarSize()
+      avatarSize: this.getAvatarSize(),
+      countdownDay: 0,
+      countdownHour: 0,
+      countdownMin: 0,
+      countdownSec: 0,
+      countdown: 0,
+      interval: null
     }
   },
   created () {
@@ -128,6 +132,19 @@ export default {
       })
       this.background = require(`../assets/backgrounds/${roomInfo.background}`)
     }
+    let date = new Date(this.announceDate)
+    let now = new Date()
+    console.log(`date: ${date}`)
+    console.log(`now: ${now}`)
+    this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
+    this.interval = setInterval(() => {
+      console.log(`countdown: ${this.countdown}`)
+      if (this.countdown <= 0) {
+        clearInterval(this.interval)
+        this.interval = null
+      }
+      this.computeInterval(this.countdown--)
+    }, 1000)
   },
   methods: {
     loadFromStorage () {
@@ -158,12 +175,14 @@ export default {
         this.background = require(`../assets/backgrounds/${roomInfo.background}`)
       }
     },
+    computeInterval (interval) {
+      this.countdownDay = interval / 3600 / 24 | 0
+      this.countdownHour = (interval % (3600 * 24)) / 3600 | 0
+      this.countdownMin = ((interval % (3600 * 24)) % 3600) / 60 | 0
+      this.countdownSec = (((interval % (3600 * 24)) % 3600) % 60) | 0
+    },
     sendInvitation () {
       // todo
-    },
-    getRemainingDay () {
-      var now = new Date()
-      return ((this.announceDate - now) / (1000 * 3600 * 24)) | 0
     },
     getAvatarSize () {
       if (screen.width < 235) return 50
@@ -179,6 +198,13 @@ export default {
     },
     onResize () {
       this.avatarSize = this.getAvatarSize()
+    },
+    back () {
+      if (this.interval != null) {
+        clearInterval(this.interval)
+        this.interval = null
+      }
+      this.$router.push({ name: 'Profile' })
     }
   }
 }
