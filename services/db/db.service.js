@@ -4,10 +4,7 @@ const Mailer = require('../email/mailer.service')
 require('dotenv').config()
 
 const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    connectionString: process.env.DATABASE_URL
 })
 client.connect()
 

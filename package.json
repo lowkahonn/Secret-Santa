@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node api.js",
     "dev": "cd ./vue && npm run build && cd ../ && nodemon api.js",
-    "backend": "nodemon api.js"
+    "backend": "nodemon api.js",
+    "heroku-postbuild": "./build.sh"
   },
   "author": "lowkahonn",
   "license": "ISC",
