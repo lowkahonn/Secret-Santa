@@ -73,7 +73,7 @@ export default {
       joinRoomError: false
     }
   },
-  mounted () {
+  async mounted () {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize)
     })
