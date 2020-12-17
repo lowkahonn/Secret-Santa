@@ -54,7 +54,7 @@ export default {
     if (this.avatarProp) {
       this.avatar = require(`../assets/avatars/${this.avatarProp}`)
     } else {
-      this.loadFromStorage()
+      await this.loadFromStorage()
     }
   },
   methods: {
@@ -63,15 +63,27 @@ export default {
       let encrypted = btoa(parsed)
       localStorage.setItem('roomInfo', encrypted)
     },
-    loadFromStorage () {
+    async loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
         let decrypted = atob(encrypted)
         let data = JSON.parse(decrypted)
-        this.username = data.username
-        this.email = data.email
-        this.avatar = require(`../assets/avatars/${data.avatar}`)
-        this.joinedRooms = data.rooms
+        await this.login(data)
+      }
+    },
+    async login (data) {
+      let res = await ApiService.login({
+        username: data.username,
+        password: data.password
+      })
+      if (res.data && res.data.result) {
+        this.username = res.data.user.username
+        this.email = res.data.user.email
+        this.joinedRooms = res.data.user.rooms
+        this.avatar = require(`../assets/avatars/${res.data.user.avatar}`)
+        let parsed = JSON.stringify(res.data.user)
+        let encrypted = btoa(parsed)
+        localStorage.save('data', encrypted)
       }
     },
     toggleJoinParty () {
