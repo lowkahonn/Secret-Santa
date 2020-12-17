@@ -189,8 +189,8 @@ const DatabaseService = {
         }
     },
     async joinRoom(roomId, username, email, avatar) {
-        let exists = checkIfUserExistsInRoom(username, roomId)
-        if (!exists.rows) {
+        let exists = await checkIfUserExistsInRoom(username, roomId)
+        if (!exists.rows || !exists.rows.length) {
             await insert(getRoomTable(roomId), ROOM_TABLE_FIELDS, [username, email, avatar])
             await update(USER_TABLE, [`rooms = rooms || '{${roomId}}'`], `username = '${username}'`)
         }

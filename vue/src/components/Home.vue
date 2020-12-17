@@ -37,14 +37,35 @@ export default {
       error: false
     }
   },
+  async mounted () {
+    await this.loadFromStorage()
+  },
   methods: {
+    saveData (data) {
+      let parsed = JSON.stringify(data)
+      let encrypted = btoa(parsed)
+      localStorage.setItem('data', encrypted)
+    },
+    async loadFromStorage () {
+      let encrypted = localStorage.getItem('data')
+      if (encrypted) {
+        let decrypted = atob(encrypted)
+        let data = JSON.parse(decrypted)
+        this.username = data.username
+        this.password = data.password
+        await this.login()
+        this.error = false
+      }
+    },
     async login () {
+      if (!this.username || !this.password) return
       const data = {
         username: this.username,
         password: this.password
       }
       let res = await ApiService.login(data)
       if (res.data && res.data.result) {
+        this.saveData(res.data.user)
         this.$router.push({
           name: 'Profile',
           params: {

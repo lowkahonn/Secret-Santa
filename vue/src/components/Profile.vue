@@ -43,13 +43,37 @@ export default {
     return {
       username: this.usernameProp,
       email: this.emailProp,
-      avatar: require(`../assets/avatars/${this.avatarProp}`),
+      avatar: '',
       joinedRooms: this.roomsProp,
       invitationCode: '',
-      joinRoom: false
+      joinRoom: false,
+      joinRoomError: false
+    }
+  },
+  async mounted () {
+    if (this.avatarProp) {
+      this.avatar = require(`../assets/avatars/${this.avatarProp}`)
+    } else {
+      this.loadFromStorage()
     }
   },
   methods: {
+    saveData (roomInfo) {
+      let parsed = JSON.stringify(roomInfo)
+      let encrypted = btoa(parsed)
+      localStorage.setItem('roomInfo', encrypted)
+    },
+    loadFromStorage () {
+      let encrypted = localStorage.getItem('data')
+      if (encrypted) {
+        let decrypted = atob(encrypted)
+        let data = JSON.parse(decrypted)
+        this.username = data.username
+        this.email = data.email
+        this.avatar = require(`../assets/avatars/${data.avatar}`)
+        this.joinedRooms = data.rooms
+      }
+    },
     toggleJoinParty () {
       this.joinRoom = !this.joinRoom
     },
@@ -61,6 +85,7 @@ export default {
       }
       let res = await ApiService.join(data)
       if (res.data && res.data.result) {
+        this.saveData(res.data.roomInfo)
         this.$router.push({
           name: 'Room',
           params: {
@@ -68,7 +93,7 @@ export default {
           }
         })
       } else {
-        console.log(res.data)
+        this.joinRoomError = true
       }
     }
   },

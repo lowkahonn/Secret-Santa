@@ -41,6 +41,7 @@ export default {
   },
   mounted () {
     this.importAll(require.context('../assets/avatars/', false, /\.png$/))
+    this.avatars.sort()
   },
   methods: {
     importAll (avatars) {
@@ -60,6 +61,11 @@ export default {
       }
       return `avatar-${this.avatarIndex}.png`
     },
+    saveData (data) {
+      let parsed = JSON.stringify(data)
+      let encrypted = btoa(parsed)
+      localStorage.setItem('data', encrypted)
+    },
     async onSubmit () {
       const data = {
         username: this.username,
@@ -69,6 +75,7 @@ export default {
       }
       const res = await ApiService.register(data)
       if (res.data && res.data.result) {
+        this.saveData(data)
         this.$router.push({
           name: 'Profile',
           params: {

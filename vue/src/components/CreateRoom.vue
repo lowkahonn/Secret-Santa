@@ -67,6 +67,15 @@ export default {
     this.importAll(require.context('../assets/backgrounds/', false, /\.jpe?g$/))
   },
   methods: {
+    loadFromStorage () {
+      let encrypted = localStorage.getItem('data')
+      if (encrypted) {
+        let decrypted = atob(encrypted)
+        let data = JSON.parse(decrypted)
+        this.username = data.username
+        this.email = data.email
+      }
+    },
     getDeadline () {
       // TODO: get the date and time from DOM and parse into ISO string
       // mock deadline at 10 secs later

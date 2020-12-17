@@ -32,7 +32,7 @@
               >
             </v-avatar>
             <v-sheet
-             :color="m.secretSanta == userName ? 'red lighten-1' : 'lunarblush lighten-1'"
+             :color="m.secretSanta == username ? 'red lighten-1' : 'lunarblush lighten-1'"
              class="avatar-name"
              @click="toggle"
             >
@@ -57,7 +57,7 @@
             <h3 class="title">
               {{members[model].name}}
             </h3>
-            <h3 v-if="members[model].secretSanta == userName" class="title">
+            <h3 v-if="members[model].secretSanta == username" class="title">
               &nbsp;want a {{members[model].wish}} !
             </h3>
           </v-row>
@@ -87,7 +87,7 @@ export default {
   data () {
     return {
       model: null,
-      userName: '',
+      username: '',
       roomName: '',
       budget: 0,
       announceDate: new Date(),
@@ -102,24 +102,56 @@ export default {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize)
     })
-    class Member {
-      constructor (name, avatar, wish, secretSanta) {
-        this.name = name
-        this.avatar = avatar
-        this.wish = wish
-        this.secretSanta = secretSanta
+    if (!this.roomInfoProp) {
+      this.loadFromStorage()
+    } else {
+      class Member {
+        constructor (name, avatar, wish, secretSanta) {
+          this.name = name
+          this.avatar = avatar
+          this.wish = wish
+          this.secretSanta = secretSanta
+        }
       }
+      let roomInfo = this.roomInfoProp
+      this.roomName = roomInfo.roomName
+      this.budget = roomInfo.budget
+      this.announceDate = roomInfo.deadline
+      this.members = roomInfo.members.map(m => {
+        return new Member(m.username, m.avatar, m.wish, m.santa)
+      })
+      this.background = require(`../assets/backgrounds/${roomInfo.background}`)
     }
-    let roomInfo = this.roomInfoProp
-    this.roomName = roomInfo.roomName
-    this.budget = roomInfo.budget
-    this.announceDate = roomInfo.deadline
-    this.members = roomInfo.members.map(m => {
-      return new Member(m.username, m.avatar, m.wish, m.santa)
-    })
-    this.background = require(`../assets/backgrounds/${roomInfo.background}`)
   },
   methods: {
+    loadFromStorage () {
+      let encrypted = localStorage.getItem('data')
+      if (encrypted) {
+        let decrypted = atob(encrypted)
+        let data = JSON.parse(decrypted)
+        this.username = data.username
+      }
+      let encryptedRoom = localStorage.getItem('roomInfo')
+      if (encryptedRoom) {
+        class Member {
+          constructor (name, avatar, wish, secretSanta) {
+            this.name = name
+            this.avatar = avatar
+            this.wish = wish
+            this.secretSanta = secretSanta
+          }
+        }
+        let decryptedRoom = atob(encryptedRoom)
+        let roomInfo = JSON.parse(decryptedRoom)
+        this.roomName = roomInfo.roomName
+        this.budget = roomInfo.budget
+        this.announceDate = roomInfo.deadline
+        this.members = roomInfo.members.map(m => {
+          return new Member(m.username, m.avatar, m.wish, m.santa)
+        })
+        this.background = require(`../assets/backgrounds/${roomInfo.background}`)
+      }
+    },
     sendInvitation () {
       // todo
     },
