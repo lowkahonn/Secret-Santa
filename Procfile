@@ -1,1 +1,1 @@
-web: cd vue/ && npm i --production && cd ../express/ && npm i --production && npm run start
+web: cd vue/ && ./build.sh && cd ../ && ./build.sh && npm run start
