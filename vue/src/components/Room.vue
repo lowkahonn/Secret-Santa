@@ -134,17 +134,16 @@ export default {
     }
     let date = new Date(this.announceDate)
     let now = new Date()
-    console.log(`date: ${date}`)
-    console.log(`now: ${now}`)
     this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
-    this.interval = setInterval(() => {
-      console.log(`countdown: ${this.countdown}`)
-      if (this.countdown <= 0) {
-        clearInterval(this.interval)
-        this.interval = null
-      }
-      this.computeInterval(this.countdown--)
-    }, 1000)
+    if (this.countdown > 0) {
+      this.interval = setInterval(() => {
+        if (this.countdown <= 0) {
+          clearInterval(this.interval)
+          this.interval = null
+        }
+        this.computeInterval(this.countdown--)
+      }, 1000)
+    }
   },
   methods: {
     loadFromStorage () {
