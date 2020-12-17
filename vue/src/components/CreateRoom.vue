@@ -18,7 +18,7 @@
             solo
             dense
             label="Gift Budget"
-            type="text"
+            type="number"
             class="input-field"
           ></v-text-field>
         </div>
@@ -146,7 +146,7 @@ export default {
   font-size: 2rem;
   padding: 1rem;
   margin: 0px;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .container {
