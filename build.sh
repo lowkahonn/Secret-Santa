@@ -4,4 +4,3 @@ npm install
 cd vue/
 ./build.sh
 cd ../
-npm run start
