@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://ko-stan-secret-santa.herokuapp.com/'
+axios.defaults.baseURL = process.env.VUE_APP_API || 'http://localhost:3000/'
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 const ApiService = {
   register (params) {

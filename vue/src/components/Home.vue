@@ -65,7 +65,8 @@ export default {
       }
       let res = await ApiService.login(data)
       if (res.data && res.data.result) {
-        this.saveData(res.data.user)
+        data.user = res.data.user
+        this.saveData(data)
         this.$router.push({
           name: 'Profile',
           params: {
