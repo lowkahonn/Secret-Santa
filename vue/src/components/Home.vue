@@ -43,13 +43,14 @@ export default {
   methods: {
     saveData (data) {
       let parsed = JSON.stringify(data)
-      let encrypted = btoa(parsed)
+      let encrypted = btoa(unescape(encodeURIComponent(parsed)))
       localStorage.setItem('data', encrypted)
     },
     async loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
-        let decrypted = atob(encrypted)
+        encrypted = encrypted.replace(/\s/g, '')
+        let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)
         this.username = data.username
         this.password = data.password

@@ -150,7 +150,8 @@ export default {
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
-        let decrypted = atob(encrypted)
+        encrypted = encrypted.replace(/\s/g, '')
+        let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)
         this.username = data.username
       }
@@ -164,7 +165,8 @@ export default {
             this.secretSanta = secretSanta
           }
         }
-        let decryptedRoom = atob(encryptedRoom)
+        encryptedRoom = encryptedRoom.replace(/\s/g, '')
+        let decryptedRoom = decodeURIComponent(escape(atob(encryptedRoom)))
         let roomInfo = JSON.parse(decryptedRoom)
         this.roomName = roomInfo.roomName
         this.budget = roomInfo.budget

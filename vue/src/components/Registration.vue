@@ -63,7 +63,7 @@ export default {
     },
     saveData (data) {
       let parsed = JSON.stringify(data)
-      let encrypted = btoa(parsed)
+      let encrypted = btoa(unescape(encodeURIComponent(parsed)))
       localStorage.setItem('data', encrypted)
     },
     async onSubmit () {

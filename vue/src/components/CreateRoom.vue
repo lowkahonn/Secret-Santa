@@ -72,13 +72,14 @@ export default {
   methods: {
     saveData (roomInfo) {
       let parsed = JSON.stringify(roomInfo)
-      let encrypted = btoa(parsed)
+      let encrypted = btoa(unescape(encodeURIComponent(parsed)))
       localStorage.setItem('roomInfo', encrypted)
     },
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
-        let decrypted = atob(encrypted)
+        encrypted = encrypted.replace(/\s/g, '')
+        let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)
         this.username = data.username
         this.email = data.email
