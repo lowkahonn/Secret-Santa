@@ -7,7 +7,7 @@
     <p class="countdown">Time Remaining: {{getRemainingDay()}}  days</p>
     <v-row justify="center">
       <v-slide-group
-        v-model="model"
+        v-model="selectedIndex"
         class="pa-4"
         center-active
         show-arrows
@@ -17,6 +17,7 @@
         <v-slide-item
           v-for="(m, index) in members"
           :key="index"
+          active-class="border"
           v-slot="{ active, toggle }"
         >
           <div>
@@ -45,7 +46,7 @@
     <div class="info">
       <v-expand-transition>
         <v-sheet
-          v-if="model != null"
+          v-if="selectedIndex != null"
           height="50"
           rounded
         >
@@ -55,10 +56,10 @@
             justify="center"
           >
             <h3 class="title">
-              {{members[model].name}}
+              {{members[selectedIndex].name}}
             </h3>
-            <h3 v-if="members[model].secretSanta == username" class="title">
-              &nbsp;want a {{members[model].wish}} !
+            <h3 v-if="members[selectedIndex].secretSanta == username" class="title">
+              &nbsp;want a {{members[selectedIndex].wish}} !
             </h3>
           </v-row>
         </v-sheet>
@@ -73,7 +74,12 @@
           </v-row>
         </div>
         <div class="col">
-          <v-btn @click="sendInvitation()" rounded color="white">Invite friends</v-btn>
+          <button class="btn-group" @click="sendInvitation()">Invite friends</button>
+        </div>
+        <div class="col">
+          <router-link to="/profile">
+            <button class="btn-group">Back to Profile</button>
+          </router-link>
         </div>
       </v-col>
     </v-row>
@@ -86,7 +92,7 @@ export default {
   props: ['roomInfoProp'],
   data () {
     return {
-      model: null,
+      selectedIndex: null,
       username: '',
       roomName: '',
       budget: 0,
@@ -241,6 +247,13 @@ export default {
   background-color: salmon;
 }
 
+.btn-group {
+  border-radius: 10px;
+  padding: 10px 10px;
+  background-color: white;
+  font-weight: bold;
+}
+
 .title {
   font-weight: bold;
 }
@@ -257,11 +270,6 @@ export default {
   .col {
     font-size: 0.5rem;
   }
-
-  .v-btn {
-    font-size: 0.5rem;
-    width: 100px;
-  }
 }
 
 @media screen and (min-width: 222px) and (max-width: 422px) {
@@ -274,10 +282,6 @@ export default {
   }
 
   .col {
-    font-size: 0.7rem;
-  }
-
-  .v-btn {
     font-size: 0.7rem;
   }
 }

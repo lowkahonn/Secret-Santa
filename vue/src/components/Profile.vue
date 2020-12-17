@@ -2,7 +2,7 @@
   <div class="profile">
     <p class="header-msg">Login successfully! <br /></p>
     <div class="profile-pic">
-      <v-avatar size="50%">
+      <v-avatar color="white" :size="avatarSize">
         <img :src=avatar>
       </v-avatar>
       <p class="username">{{ username }}</p>
@@ -28,8 +28,28 @@
       <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Join a Party</v-btn>
     </div>
     <div v-else class="join">
+            <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
       <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Back</v-btn>
-      <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
+      <br/>
+      <v-btn @click="toggleShowRoom()" class="btn-group" color="primary" rounded>Join Existing</v-btn>
+    </div>
+    <div v-if="showRoom" class="overlay">
+      <v-list-item-group v-model="selectedIndex" class="table">
+        <v-list-item
+          v-for="(room, index) in joinedRooms"
+          :key="index"
+          active-class="room-name-active"
+          class="room-name"
+        >
+          <v-spacer></v-spacer>
+          <v-avatar><img :src="getImgURL(room.background)"></v-avatar>
+          <v-spacer></v-spacer>
+          <h3>{{room.roomName}}</h3>
+          <v-spacer></v-spacer>
+        </v-list-item>
+        <v-btn @click="joinSelectedRoom()" class="btn-group">Join</v-btn>
+        <v-btn @click="toggleShowRoom()" class="btn-group">Cancel</v-btn>
+      </v-list-item-group>
     </div>
   </div>
 </template>
@@ -44,13 +64,19 @@ export default {
       username: this.usernameProp,
       email: this.emailProp,
       avatar: '',
+      avatarSize: 150,
       joinedRooms: this.roomsProp,
       invitationCode: '',
+      selectedIndex: null,
       joinRoom: false,
+      showRoom: false,
       joinRoomError: false
     }
   },
-  async mounted () {
+  mounted () {
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.onResize)
+    })
     if (this.avatarProp) {
       this.avatar = require(`../assets/avatars/${this.avatarProp}`)
     } else {
@@ -89,6 +115,9 @@ export default {
     toggleJoinParty () {
       this.joinRoom = !this.joinRoom
     },
+    toggleShowRoom () {
+      this.showRoom = !this.showRoom
+    },
     async join () {
       let data = {
         invitationCode: this.invitationCode,
@@ -107,6 +136,23 @@ export default {
       } else {
         this.joinRoomError = true
       }
+    },
+    getAvatarSize () {
+      if (screen.width < 235) return 100
+      else if (screen.width >= 235 && screen.width <= 382) return 150
+      else if (screen.width >= 382 && screen.width <= 834) return 200
+      else return 250
+    },
+    getImgURL (name) {
+      return require('../assets/backgrounds/' + name)
+    },
+    onResize () {
+      this.avatarSize = this.getAvatarSize()
+    },
+    joinSelectedRoom () {
+      if (this.selectedIndex == null) return
+      this.invitationCode = this.joinedRooms[this.selectedIndex].roomId
+      this.join()
     }
   },
   watch: {
@@ -181,7 +227,47 @@ export default {
 }
 
 .btn-group {
-  margin: 10px;
+  margin: 5px;
+}
+
+.overlay {
+  background-color: rgba(0,0,0,0.5);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.table {
+  background-color: rgb(224, 153, 106);
+  border-radius: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 50px 50px;
+  max-width: 500px;
+  width: 80%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.room-name {
+  margin: 10px auto;
+  max-width: 250px;
+  border-radius: 10px;
+  background-color: rgb(255, 186, 126);
+  padding: 5px 5px;
+}
+
+.room-name-active {
+  border: 3px dashed black;
 }
 
 @media screen and (max-width: 551px) {

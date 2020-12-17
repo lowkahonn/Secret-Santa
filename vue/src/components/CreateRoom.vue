@@ -9,6 +9,7 @@
             dense
             label="Room Name"
             type="text"
+            class="input-field"
           ></v-text-field>
         </div>
         <div>
@@ -18,6 +19,7 @@
             dense
             label="Gift Budget"
             type="text"
+            class="input-field"
           ></v-text-field>
         </div>
         <div>
@@ -26,7 +28,8 @@
             solo
             dense
             label="Announce Date"
-            type="date"
+            type="datetime-local"
+            class="input-field"
           ></v-text-field>
         </div>
         <div class="background-selection">
@@ -67,6 +70,11 @@ export default {
     this.importAll(require.context('../assets/backgrounds/', false, /\.jpe?g$/))
   },
   methods: {
+    saveData (roomInfo) {
+      let parsed = JSON.stringify(roomInfo)
+      let encrypted = btoa(parsed)
+      localStorage.setItem('roomInfo', encrypted)
+    },
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
@@ -106,6 +114,7 @@ export default {
       }
       let res = await ApiService.createRoom(data)
       if (res.data && res.data.result && res.data.roomInfo) {
+        this.saveData(res.data.roomInfo)
         this.$router.push({
           name: 'Room',
           params: {
@@ -154,7 +163,7 @@ export default {
 
 @media screen and (max-width: 350px) {
   .msg {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 
   .container {
@@ -166,22 +175,50 @@ export default {
   .arrow-btn{
     margin: 5px 0px;
   }
+
+  .input-field {
+    font-size: 0.5rem;
+  }
+}
+
+@media screen and (min-width: 350px) and (max-width: 650px){
+  .msg {
+    font-size: 1.5rem;
+  }
+
+  .container {
+    padding: 25px 25px;
+    min-width:150px;
+    width: 250px;
+  }
+
+  .arrow-btn{
+    margin: 15px 15px;
+  }
+
+  .input-field {
+    font-size: 0.7rem;
+  }
 }
 
 @media screen and (min-width: 650px) {
   .msg {
-    font-size: 3rem;
+    font-size: 2rem;
   }
 
   .container {
-    padding: 50px 25px;
+    padding: 50px 10px;
     min-width:150px;
     max-width: 800px;
     width: 500px;
   }
 
   .arrow-btn{
-    margin: 20px 20px;
+    margin: 10px 10px;
+  }
+
+  .input-field {
+    font-size: 1rem;
   }
 }
 </style>
