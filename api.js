@@ -3,6 +3,7 @@ const history = require('connect-history-api-fallback')
 const registrationRouter = require('./routes/registration.router')
 const loginRouter = require('./routes/login.router')
 const roomRouter = require('./routes/room.router')
+require('dotenv').config()
 const app = express();
 app.use(express.json());
 // // Middleware for serving '/dist' directory
