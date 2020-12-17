@@ -110,7 +110,7 @@ export default {
         this.avatar = require(`../assets/avatars/${res.data.user.avatar}`)
         let parsed = JSON.stringify(res.data.user)
         let encrypted = btoa(unescape(encodeURIComponent(parsed)))
-        localStorage.save('data', encrypted)
+        localStorage.setItem('data', encrypted)
       }
     },
     toggleJoinParty () {
