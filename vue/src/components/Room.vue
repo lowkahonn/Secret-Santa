@@ -1,8 +1,8 @@
 <template>
   <div class="room" :style="{ 'background-image': 'url(' + background + ')'}">
     <div class="container">
-      <img src="../assets/wood-sign.png" width="200">
-      <div class="room-name"> {{roomName}}</div>
+      <img src="../assets/wood-sign.png" class="room-plate">
+      <div class="room-name"> ddddd</div>
     </div>
     <p class="countdown">Time Remaining<br>{{ countdownDay }} days {{ countdownHour }} hours {{ countdownMin }} mins {{ countdownSec }} secs</p>
     <v-row justify="center">
@@ -68,13 +68,16 @@
     <v-row align="center" justify="center" class="info-board">
       <v-col>
         <div class="col">
+          <h3>Invite friends with this code:&nbsp;
+            <span id="roomId" class="room-id">{{ roomId }}</span>
+            <v-icon color="black" small @click="copyRoomCode()"> mdi-content-copy</v-icon>
+          </h3>
+        </div>
+        <div class="col">
           <v-row justify="center" align="center">
             <img class="icon" src="../assets/budget.png">
             <h3>&nbsp; Budget: {{budget}}</h3>
           </v-row>
-        </div>
-        <div class="col">
-          <button class="btn-group" @click="sendInvitation()">Invite friends</button>
         </div>
         <div class="col">
           <button @click="back()" class="btn-group">Back to Profile</button>
@@ -93,6 +96,7 @@ export default {
       selectedIndex: null,
       username: '',
       roomName: '',
+      roomId: 0,
       budget: 0,
       announceDate: '',
       background: require('../assets/snowing.gif'),
@@ -125,6 +129,7 @@ export default {
       }
       let roomInfo = this.roomInfoProp
       this.roomName = roomInfo.roomName
+      this.roomId = roomInfo.roomId
       this.budget = roomInfo.budget
       this.announceDate = roomInfo.deadline
       this.members = roomInfo.members.map(m => {
@@ -134,23 +139,23 @@ export default {
     }
     let date = new Date(this.announceDate)
     let now = new Date()
+    console.log(`date: ${date}`)
+    console.log(`now: ${now}`)
     this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
-    if (this.countdown > 0) {
-      this.interval = setInterval(() => {
-        if (this.countdown <= 0) {
-          clearInterval(this.interval)
-          this.interval = null
-        }
-        this.computeInterval(this.countdown--)
-      }, 1000)
-    }
+    this.interval = setInterval(() => {
+      console.log(`countdown: ${this.countdown}`)
+      if (this.countdown <= 0) {
+        clearInterval(this.interval)
+        this.interval = null
+      }
+      this.computeInterval(this.countdown--)
+    }, 1000)
   },
   methods: {
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
-        encrypted = encrypted.replace(/\s/g, '')
-        let decrypted = decodeURIComponent(escape(atob(encrypted)))
+        let decrypted = atob(encrypted)
         let data = JSON.parse(decrypted)
         this.username = data.username
       }
@@ -164,10 +169,10 @@ export default {
             this.secretSanta = secretSanta
           }
         }
-        encryptedRoom = encryptedRoom.replace(/\s/g, '')
-        let decryptedRoom = decodeURIComponent(escape(atob(encryptedRoom)))
+        let decryptedRoom = atob(encryptedRoom)
         let roomInfo = JSON.parse(decryptedRoom)
         this.roomName = roomInfo.roomName
+        this.roomId = roomInfo.roomId
         this.budget = roomInfo.budget
         this.announceDate = roomInfo.deadline
         this.members = roomInfo.members.map(m => {
@@ -182,14 +187,19 @@ export default {
       this.countdownMin = ((interval % (3600 * 24)) % 3600) / 60 | 0
       this.countdownSec = (((interval % (3600 * 24)) % 3600) % 60) | 0
     },
-    sendInvitation () {
-      // todo
+    copyRoomCode () {
+      var r = document.createRange()
+      r.selectNode(document.getElementById('roomId'))
+      window.getSelection().removeAllRanges()
+      window.getSelection().addRange(r)
+      document.execCommand('copy')
+      window.getSelection().removeAllRanges()
     },
     getAvatarSize () {
-      if (screen.width < 235) return 50
-      else if (screen.width >= 235 && screen.width <= 382) return 70
-      else if (screen.width >= 382 && screen.width <= 834) return 100
-      else return 140
+      if (screen.width < 235 || screen.height < 435) return 50
+      else if ((screen.width >= 235 && screen.width <= 382) || screen.height < 575) return 70
+      else if ((screen.width >= 382 && screen.width <= 834) || screen.height < 735) return 100
+      else return 150
     },
     getImgURL (name) {
       return require('../assets/avatars/' + name)
@@ -233,7 +243,7 @@ export default {
   color: white;
 }
 
-.room-name{
+.room-name {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -242,12 +252,23 @@ export default {
   font-weight: bold;
 }
 
+.room-plate {
+  width: 200px;
+  filter: brightness(150%);
+}
+
 .info-board {
   background-color: burlywood;
   max-width: 500px;
-  margin: 20px auto;
+  margin: 5px auto;
   border-radius: 20px;
   border: 5px solid rgb(133, 68, 7);
+}
+
+.room-id {
+  background-color: palegoldenrod;
+  padding: 5px 5px;
+  border-radius: 5px;
 }
 
 .icon {
@@ -257,6 +278,10 @@ export default {
 .countdown {
   font-weight: bold;
   background-color: powderblue;
+  border-radius: 10px;
+  border-bottom: 3px solid rgb(81, 116, 231);
+  max-width: 350px;
+  margin: 0 auto;
 }
 
 .avatar {
@@ -294,7 +319,17 @@ export default {
     width: 20px;
   }
 
+  .countdown {
+    max-width: 175px;
+    font-size: 10px;
+  }
+
+  .room-plate {
+    width: 100px;
+  }
+
   .col {
+    padding: 2px 2px;
     font-size: 0.5rem;
   }
 }
@@ -304,18 +339,58 @@ export default {
     max-width: 200px;
   }
 
+  .countdown {
+    max-width: 200px;
+    font-size: 12.5px;
+  }
+
   .icon {
     width: 30px;
   }
 
+  .room-plate {
+    width: 100px;
+  }
+
   .col {
-    font-size: 0.7rem;
+    padding: 4px 4px;
+    font-size: 0.6rem;
   }
 }
 
 @media screen and (min-width: 422px) and (max-width: 650px) {
   .info-board {
     max-width: 350px;
+  }
+
+   .room-plate {
+    width: 150px;
+  }
+}
+
+@media screen and (max-height: 622px) {
+ .room-plate {
+    width: 100px;
+  }
+
+  .col {
+    padding: 4px 4px;
+    font-size: 0.5rem;
+  }
+
+  .icon {
+    width: 30px;
+  }
+}
+
+@media screen and (min-height: 622px) and (max-height: 828px) and (min-width: 422px) {
+ .room-plate {
+    width: 150px;
+  }
+
+  .col {
+    padding: 6px 6px;
+    font-size: 0.7rem;
   }
 }
 </style>

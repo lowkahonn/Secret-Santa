@@ -143,7 +143,7 @@ export default {
 .msg {
   background-color: rgba(255, 255, 255, 0.8);
   align-items: center;
-  font-size: 2rem;
+  font-size: 1.5rem;
   padding: 1rem;
   margin: 0px;
   margin-top: 1.5rem;
@@ -160,13 +160,37 @@ export default {
   margin: 10px 10px;
 }
 
-@media screen and (max-width: 350px) {
+.input-field {
+  font-size: 0.7rem;
+}
+
+@media screen and (max-width: 275px), (max-height: 550px) {
+  .msg {
+    font-size: 0.8rem;
+  }
+
+  .container {
+    padding: 5px 5px;
+    min-width:150px;
+    width: 180px;
+  }
+
+  .arrow-btn{
+    margin: 5px 0px;
+  }
+
+  .input-field {
+    font-size: 0.6rem;
+  }
+}
+
+@media screen and (min-width: 275px) and (max-width: 350px) and (min-height: 550px) and (max-height: 600px) {
   .msg {
     font-size: 1rem;
   }
 
   .container {
-    padding: 25px 25px;
+    padding: 5px 5px;
     min-width:150px;
     width: 250px;
   }
@@ -180,15 +204,15 @@ export default {
   }
 }
 
-@media screen and (min-width: 350px) and (max-width: 650px){
+@media screen and (min-width: 350px) and (max-width: 650px) and (min-height: 600px){
   .msg {
     font-size: 1.5rem;
   }
 
   .container {
-    padding: 25px 25px;
+    padding: 10px 10px;
     min-width:150px;
-    width: 250px;
+    width: 400px;
   }
 
   .arrow-btn{
@@ -200,7 +224,7 @@ export default {
   }
 }
 
-@media screen and (min-width: 650px) {
+@media screen and (min-width: 650px) and (min-height: 774px){
   .msg {
     font-size: 2rem;
   }
