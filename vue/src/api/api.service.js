@@ -15,6 +15,9 @@ const ApiService = {
   join (params) {
     return axios.post('room/join', params)
   },
+  checkUsername (username) {
+    return axios.get(`register?username=${username}`)
+  },
   updateWish (params) {
     return axios.post('room/updateWish', params)
   }
