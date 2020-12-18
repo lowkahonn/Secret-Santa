@@ -15,6 +15,7 @@
       <fieldset class="form-group">
         <input class="form-control" type="text" v-model="username" placeholder="Username"/>
       </fieldset>
+      <div v-if="status" :class="invalid ? 'username-invalid' : 'username-check'">{{ status }}</div>
       <fieldset class="form-group">
         <input class="form-control" type="text" v-model="email" placeholder="Email"/>
       </fieldset>
@@ -33,10 +34,40 @@ export default {
   data () {
     return {
       username: '',
+      submittedUsername: '',
+      debouncer: null,
+      invalid: false,
+      status: null,
       email: '',
       password: '',
       avatarIndex: 0,
       avatars: []
+    }
+  },
+  watch: {
+    username: function (newUsername, oldUsername) {
+      this.status = null
+      this.invalid = false
+      clearTimeout(this.debouncer)
+      if (this.username !== '') {
+        this.submittedUsername = this.username
+        this.debouncer = setTimeout(async () => {
+          this.status = `Looking up username availability`
+          let valid = await ApiService.checkUsername(this.submittedUsername)
+          if (this.submittedUsername === this.username) {
+            if (valid.data.result) {
+              this.invalid = false
+              this.status = `Username ${this.submittedUsername} is available`
+            } else {
+              this.invalid = true
+              this.status = `Username ${this.submittedUsername} is not available`
+            }
+          } else {
+            this.status = null
+          }
+          this.submittedUsername = ''
+        }, 1000)
+      }
     }
   },
   mounted () {
@@ -66,6 +97,9 @@ export default {
       let encrypted = btoa(unescape(encodeURIComponent(parsed)))
       localStorage.setItem('data', encrypted)
     },
+    getError () {
+      return this.error && (this.username === this.submittedUsername)
+    },
     async onSubmit () {
       const data = {
         username: this.username,
@@ -73,6 +107,7 @@ export default {
         password: this.password,
         avatar: this.getAvatarName()
       }
+      this.submittedUsername = this.username
       const res = await ApiService.register(data)
       if (res.data && res.data.result) {
         this.saveData(data)
@@ -84,6 +119,8 @@ export default {
             avatarProp: data.avatar
           }
         })
+      } else {
+        this.status = `Username ${this.username} is not available`
       }
     }
   }
@@ -162,6 +199,14 @@ export default {
   text-decoration: none;
   margin: 20px 2px;
   cursor: pointer;
+}
+
+.username-invalid {
+  color: red;
+}
+
+.username-check {
+  color: blue;
 }
 
 @media screen and (max-width: 601px) {

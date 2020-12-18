@@ -36,4 +36,15 @@ router.post('/', async function (req, res) {
     res.send({ result: true })
 })
 
+router.get('/', async function (req, res) {
+    await db.init()
+    let username = req.query.username
+    if (!username) {
+        res.send({ result: false })
+        return
+    }
+    let valid = await db.checkUsernameValid(username)
+    res.send({ result: valid != null && valid })
+})
+
 module.exports = router

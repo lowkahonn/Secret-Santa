@@ -11,7 +11,7 @@
         <fieldset class="form-group">
           <input class="form-control" type="password" v-model="password" placeholder="Password"/>
         </fieldset>
-        <div v-if="error" class="error">
+        <div v-if="error" class="invalid-username">
           The username or password is incorrect.
         </div>
         <button class="btn">Login</button>
@@ -33,8 +33,20 @@ export default {
   data () {
     return {
       username: '',
+      submittedUsername: '',
       password: '',
       error: false
+    }
+  },
+  watch: {
+    username: function (_, __) {
+      if (this.error && this.submittedUsername === this.username) {
+        this.submittedUsername = ''
+      }
+      this.error = false
+    },
+    password: function (_, __) {
+      this.error = false
     }
   },
   async mounted () {
@@ -170,8 +182,8 @@ img {
   cursor: pointer;
 }
 
-.error {
-  color: red
+.invalid-username {
+  color: red;
 }
 
 @media screen and (max-width: 601px) {
