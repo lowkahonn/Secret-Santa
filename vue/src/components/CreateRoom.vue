@@ -77,7 +77,9 @@ export default {
     },
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
-      if (encrypted) {
+      if (!encrypted) {
+        this.$router.push('Home')
+      } else {
         encrypted = encrypted.replace(/\s/g, '')
         let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)

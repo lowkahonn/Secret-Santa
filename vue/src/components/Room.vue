@@ -2,7 +2,7 @@
   <div class="room" :style="{ 'background-image': 'url(' + background + ')'}">
     <div class="container">
       <img src="../assets/wood-sign.png" class="room-plate">
-      <div class="room-name"> ddddd</div>
+      <div class="room-name">{{roomName}}</div>
     </div>
     <p class="countdown">Time Remaining<br>{{ countdownDay }} days {{ countdownHour }} hours {{ countdownMin }} mins {{ countdownSec }} secs</p>
     <v-row justify="center">
@@ -70,7 +70,7 @@
         <div class="col">
           <h3>Invite friends with this code:&nbsp;
             <span id="roomId" class="room-id">{{ roomId }}</span>
-            <v-icon color="black" small @click="copyRoomCode()"> mdi-content-copy</v-icon>
+            <v-btn small @click="copyRoomCode()" outlined>Copy</v-btn>
           </h3>
         </div>
         <div class="col">
@@ -113,6 +113,9 @@ export default {
   created () {
   },
   mounted () {
+    if (!localStorage.getItem('data')) {
+      this.$router.push('Home')
+    }
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize)
     })
@@ -139,17 +142,16 @@ export default {
     }
     let date = new Date(this.announceDate)
     let now = new Date()
-    console.log(`date: ${date}`)
-    console.log(`now: ${now}`)
     this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
-    this.interval = setInterval(() => {
-      console.log(`countdown: ${this.countdown}`)
-      if (this.countdown <= 0) {
-        clearInterval(this.interval)
-        this.interval = null
-      }
-      this.computeInterval(this.countdown--)
-    }, 1000)
+    if (this.countdown > 0) {
+      this.interval = setInterval(() => {
+        if (this.countdown <= 0) {
+          clearInterval(this.interval)
+          this.interval = null
+        }
+        this.computeInterval(this.countdown--)
+      }, 1000)
+    }
   },
   methods: {
     loadFromStorage () {
@@ -169,7 +171,8 @@ export default {
             this.secretSanta = secretSanta
           }
         }
-        let decryptedRoom = atob(encryptedRoom)
+        encryptedRoom = encryptedRoom.replace(/\s/g, '')
+        let decryptedRoom = decodeURIComponent(escape(atob(encryptedRoom)))
         let roomInfo = JSON.parse(decryptedRoom)
         this.roomName = roomInfo.roomName
         this.roomId = roomInfo.roomId
@@ -199,7 +202,7 @@ export default {
       if (screen.width < 235 || screen.height < 435) return 50
       else if ((screen.width >= 235 && screen.width <= 382) || screen.height < 575) return 70
       else if ((screen.width >= 382 && screen.width <= 834) || screen.height < 735) return 100
-      else return 150
+      else return 140
     },
     getImgURL (name) {
       return require('../assets/avatars/' + name)
@@ -250,6 +253,7 @@ export default {
   transform: translate(-50%, -50%);
   color: black;
   font-weight: bold;
+  font-weight: 15px;
 }
 
 .room-plate {
