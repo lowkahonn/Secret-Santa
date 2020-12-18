@@ -48,6 +48,7 @@ async function createRoomTable(roomId) {
         'email VARCHAR(128) NOT NULL,' +
         'avatar VARCHAR(32) NOT NULL,' +
         'santa VARCHAR(64),' +
+        'wish VARCHAR(64),' +
         'FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE' +
     ')')
 }
@@ -206,10 +207,18 @@ const DatabaseService = {
     async getAllUsersInRoom(roomId, username) {
         let valid = await checkIfUserExistsInRoom(username, roomId)
         if (valid) {
-            let q = await query(getRoomTable(roomId), ROOM_TABLE_FIELDS)
+            let q = await query(getRoomTable(roomId), ['username', 'email', 'avatar', 'santa', 'wish'])
             return q.rows
         }
         return null
+    },
+    async updateWish(roomId, username, wish) {
+        let valid = await checkIfUserExistsInRoom(username, roomId)
+        if (valid) {
+            await update(getRoomTable(roomId), [`wish = '${wish}'`], `username = '${username}'`)
+            return true
+        }
+        return false
     }
 }
 

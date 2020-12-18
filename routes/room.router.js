@@ -75,6 +75,29 @@ router.post('/join', async function (req, res) {
     }
 })
 
-// TODO: get room info
+router.post('/updateWish', async function (req, res) {
+    console.log(`/room/updateWish : ${req.body.username}`)
+    let username = req.body.username
+    let roomId = req.body.roomId
+    let wish = req.body.wish
+    if (!username || !roomId || !wish || wish === '') {
+        res.send({ result: false })
+        return
+    }
+    await db.init()
+
+    let user = await db.getUser(username)
+    if (!user) {
+        res.send({ result: false })
+        return
+    }
+    try {
+        let q = await db.updateWish(roomId, username, wish)
+        res.send({ result: q })
+    } catch (e) {
+        console.log(e)
+        res.send({ result: false })
+    }
+})
 
 module.exports = router
