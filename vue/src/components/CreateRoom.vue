@@ -119,6 +119,7 @@ export default {
         this.$router.push({
           name: 'Room',
           params: {
+            usernameProp: this.username,
             roomInfoProp: res.data.roomInfo
           }
         })

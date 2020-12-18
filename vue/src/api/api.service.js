@@ -14,6 +14,9 @@ const ApiService = {
   },
   join (params) {
     return axios.post('room/join', params)
+  },
+  updateWish (params) {
+    return axios.post('room/updateWish', params)
   }
 }
 
