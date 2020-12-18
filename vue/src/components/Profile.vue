@@ -31,7 +31,10 @@
             <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
       <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Back</v-btn>
       <br/>
-      <v-btn @click="toggleShowRoom()" class="btn-group" color="primary" rounded>Join Existing</v-btn>
+      <v-btn @click="toggleShowRoom()" class="btn-group" color="primary" rounded>Join My Rooms</v-btn>
+    </div>
+    <div v-if="!joinRoom">
+      <v-btn @click="logOut()" class="btn-group" color="primary darken-1" rounded>Log out</v-btn>
     </div>
     <div v-if="showRoom" class="overlay">
       <v-list-item-group v-model="selectedIndex" class="table">
@@ -91,7 +94,9 @@ export default {
     },
     async loadFromStorage () {
       let encrypted = localStorage.getItem('data')
-      if (encrypted) {
+      if (!encrypted) {
+        this.$router.push('Home')
+      } else {
         encrypted = encrypted.replace(/\s/g, '')
         let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)
@@ -154,6 +159,10 @@ export default {
       if (this.selectedIndex == null) return
       this.invitationCode = this.joinedRooms[this.selectedIndex].roomId
       this.join()
+    },
+    logOut () {
+      localStorage.removeItem('data')
+      this.$router.push({name: 'Home'})
     }
   },
   watch: {
