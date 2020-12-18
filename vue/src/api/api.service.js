@@ -17,6 +17,10 @@ const ApiService = {
   },
   checkUsername (username) {
     return axios.get(`register?username=${username}`)
+  },
+  checkRoomValid (roomId) {
+    if (!roomId || roomId === '') return false
+    return axios.get(`room/check?roomId=${roomId}`)
   }
 }
 

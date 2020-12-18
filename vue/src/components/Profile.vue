@@ -21,7 +21,7 @@
     </div>
     <div v-else>
       <fieldset class="form-group">
-        <input class="form-control" type="text" v-model="invitationCode" placeholder="Invitation code"/>
+        <input class="form-control" type="text" v-model="roomId" placeholder="Invitation code"/>
       </fieldset>
     </div>
     <div v-if="!joinRoom">
@@ -69,7 +69,7 @@ export default {
       avatar: '',
       avatarSize: 150,
       joinedRooms: this.roomsProp,
-      invitationCode: '',
+      roomId: '',
       selectedIndex: null,
       joinRoom: false,
       showRoom: false,
@@ -126,7 +126,7 @@ export default {
     },
     async join () {
       let data = {
-        invitationCode: this.invitationCode,
+        roomId: this.roomId,
         username: this.username,
         email: this.email
       }
@@ -157,7 +157,7 @@ export default {
     },
     joinSelectedRoom () {
       if (this.selectedIndex == null) return
-      this.invitationCode = this.joinedRooms[this.selectedIndex].roomId
+      this.roomId = this.joinedRooms[this.selectedIndex].roomId
       this.join()
     },
     logOut () {

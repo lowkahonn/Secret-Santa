@@ -9,12 +9,14 @@ export default new Router({
     {
       path: '/',
       name: 'Home',
-      component: () => import('@/components/Home')
+      component: () => import('@/components/Home'),
+      props: true
     },
     {
       path: '/register',
       name: 'Registration',
-      component: () => import('@/components/Registration')
+      component: () => import('@/components/Registration'),
+      props: true
     },
     {
       path: '/profile',

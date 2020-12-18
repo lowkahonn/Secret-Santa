@@ -19,7 +19,12 @@
       <div class="register">
         Don't have an account yet?
         <router-link
-          :to="{ name: 'Registration' }"
+          :to="{
+            name: 'Registration',
+            params: {
+              pendingHashProp: pendingHash
+            }
+          }"
           class="sign-up"
         >Sign up</router-link>
       </div>
@@ -30,9 +35,11 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Home',
+  props: ['pendingHashProp'],
   data () {
     return {
       username: '',
+      pendingHash: this.pendingHashProp,
       submittedUsername: '',
       password: '',
       error: false
@@ -60,9 +67,7 @@ export default {
     },
     async loadFromStorage () {
       let encrypted = localStorage.getItem('data')
-      if (!encrypted) {
-        this.$router.push('Home')
-      } else {
+      if (encrypted) {
         encrypted = encrypted.replace(/\s/g, '')
         let decrypted = decodeURIComponent(escape(atob(encrypted)))
         let data = JSON.parse(decrypted)
@@ -82,15 +87,34 @@ export default {
       if (res.data && res.data.result) {
         data.user = res.data.user
         this.saveData(data)
-        this.$router.push({
-          name: 'Profile',
-          params: {
-            usernameProp: res.data.user.username,
-            emailProp: res.data.user.email,
-            avatarProp: res.data.user.avatar,
-            roomsProp: res.data.user.rooms
+        if (this.pendingHash && this.pendingHash !== '') {
+          let q = await ApiService.join({
+            username: this.username,
+            email: res.data.user.email,
+            roomId: this.pendingHash
+          })
+          if (q.data && q.data.result) {
+            let parsed = JSON.stringify(q.data.roomInfo)
+            let encrypted = btoa(unescape(encodeURIComponent(parsed)))
+            localStorage.setItem('roomInfo', encrypted)
+            this.$router.push({
+              name: 'Room',
+              params: {
+                roomInfoProp: q.data.roomInfo
+              }
+            })
           }
-        })
+        } else {
+          this.$router.push({
+            name: 'Profile',
+            params: {
+              usernameProp: res.data.user.username,
+              emailProp: res.data.user.email,
+              avatarProp: res.data.user.avatar,
+              roomsProp: res.data.user.rooms
+            }
+          })
+        }
       } else {
         this.error = true
       }

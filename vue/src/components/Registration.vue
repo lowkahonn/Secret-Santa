@@ -31,9 +31,11 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Registration',
+  props: ['pendingHashProp'],
   data () {
     return {
       username: '',
+      pendingHash: this.pendingHashProp,
       submittedUsername: '',
       debouncer: null,
       invalid: false,
@@ -111,14 +113,33 @@ export default {
       const res = await ApiService.register(data)
       if (res.data && res.data.result) {
         this.saveData(data)
-        this.$router.push({
-          name: 'Profile',
-          params: {
-            usernameProp: this.username,
-            emailProp: this.email,
-            avatarProp: data.avatar
+        if (this.pendingHash && this.pendingHash !== '') {
+          let q = await ApiService.join({
+            username: this.username,
+            email: this.email,
+            roomId: this.pendingHash
+          })
+          if (q.data && q.data.result) {
+            let parsed = JSON.stringify(q.data.roomInfo)
+            let encrypted = btoa(unescape(encodeURIComponent(parsed)))
+            localStorage.setItem('roomInfo', encrypted)
+            this.$router.push({
+              name: 'Room',
+              params: {
+                roomInfoProp: q.data.roomInfo
+              }
+            })
           }
-        })
+        } else {
+          this.$router.push({
+            name: 'Profile',
+            params: {
+              usernameProp: this.username,
+              emailProp: this.email,
+              avatarProp: data.avatar
+            }
+          })
+        }
       } else {
         this.status = `Username ${this.username} is not available`
       }

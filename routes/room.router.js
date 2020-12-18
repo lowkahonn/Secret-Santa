@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require('uuid')
 
 function generateUniqueId(length = 8) {
     id = uuidv4().toString(36).slice(0, length)
-    console.log(id)
     return id
 }
 
@@ -45,8 +44,8 @@ router.post('/create', async function (req, res) {
 })
 
 router.post('/join', async function (req, res) {
-    console.log(`/room/join : ${req.body.invitationCode}`)
-    let roomId = req.body.invitationCode
+    console.log(`/room/join : ${req.body.roomId}`)
+    let roomId = req.body.roomId
     let username = req.body.username
     let email = req.body.email
     if (!roomId || !username || !email) {
@@ -93,6 +92,23 @@ router.post('/updateWish', async function (req, res) {
     }
     try {
         let q = await db.updateWish(roomId, username, wish)
+        res.send({ result: q })
+    } catch (e) {
+        console.log(e)
+        res.send({ result: false })
+    }
+})
+
+router.get('/check', async function (req, res) {
+    console.log(`/room/check : ${req.query.roomId}`)
+    let roomId = req.query.roomId
+    if (!roomId || roomId === '') {
+        res.send({ result: false })
+        return
+    }
+    await db.init()
+    try {
+        let q = await db.checkRoomExists(roomId)
         res.send({ result: q })
     } catch (e) {
         console.log(e)

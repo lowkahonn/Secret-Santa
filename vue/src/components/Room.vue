@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import ApiService from '@/api/api.service'
 export default {
   name: 'Room',
   props: ['roomInfoProp'],
@@ -95,7 +96,9 @@ export default {
     return {
       selectedIndex: null,
       username: '',
+      avatar: '',
       roomName: '',
+      email: '',
       roomId: 0,
       budget: 0,
       announceDate: '',
@@ -107,21 +110,78 @@ export default {
       countdownMin: 0,
       countdownSec: 0,
       countdown: 0,
-      interval: null
+      interval: null,
+      hash: ''
     }
   },
   created () {
   },
-  mounted () {
-    if (!localStorage.getItem('data')) {
-      this.$router.push('Home')
-    }
+  async mounted () {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize)
     })
-    if (!this.roomInfoProp) {
-      this.loadFromStorage()
+    let data = localStorage.getItem('data')
+    let hash = location.hash.slice(1)
+    if (hash === '') {
+      if (!this.roomInfoProp) {
+        this.loadFromStorage()
+      } else {
+        let roomInfo = this.roomInfoProp
+        this.parseLoadedData(roomInfo)
+        await this.joinRoom(this.roomId)
+      }
     } else {
+      let valid = await ApiService.checkRoomValid(hash)
+      if (!valid || !valid.data || !valid.data.result) {
+        this.$router.push({ name: 'Home' })
+      } else {
+        if (data) {
+          this.loadFromStorage()
+          await this.joinRoom(hash)
+        } else {
+          this.$router.push({
+            name: 'Home',
+            params: {
+              pendingHashProp: hash
+            }
+          })
+        }
+      }
+    }
+    this.startCountdown()
+  },
+  methods: {
+    async joinRoom (roomId) {
+      let q = await ApiService.join({
+        roomId,
+        username: this.username,
+        email: this.email
+      })
+      if (q.data && q.data.result) {
+        this.parseLoadedData(q.data.roomInfo)
+        this.saveData(q.data.roomInfo)
+      }
+    },
+    saveData (roomInfo) {
+      let parsed = JSON.stringify(roomInfo)
+      let encrypted = btoa(unescape(encodeURIComponent(parsed)))
+      localStorage.setItem('roomInfo', encrypted)
+    },
+    startCountdown () {
+      let date = new Date(this.announceDate)
+      let now = new Date()
+      this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
+      if (this.countdown > 0) {
+        this.interval = setInterval(() => {
+          if (this.countdown <= 0) {
+            clearInterval(this.interval)
+            this.interval = null
+          }
+          this.computeInterval(this.countdown--)
+        }, 1000)
+      }
+    },
+    parseLoadedData (roomInfo) {
       class Member {
         constructor (name, avatar, wish, secretSanta) {
           this.name = name
@@ -130,7 +190,6 @@ export default {
           this.secretSanta = secretSanta
         }
       }
-      let roomInfo = this.roomInfoProp
       this.roomName = roomInfo.roomName
       this.roomId = roomInfo.roomId
       this.budget = roomInfo.budget
@@ -139,49 +198,22 @@ export default {
         return new Member(m.username, m.avatar, m.wish, m.santa)
       })
       this.background = require(`../assets/backgrounds/${roomInfo.background}`)
-    }
-    let date = new Date(this.announceDate)
-    let now = new Date()
-    this.countdown = (date.getTime() - now.getTime()) / 1000 | 0
-    if (this.countdown > 0) {
-      this.interval = setInterval(() => {
-        if (this.countdown <= 0) {
-          clearInterval(this.interval)
-          this.interval = null
-        }
-        this.computeInterval(this.countdown--)
-      }, 1000)
-    }
-  },
-  methods: {
+    },
     loadFromStorage () {
       let encrypted = localStorage.getItem('data')
       if (encrypted) {
         let decrypted = atob(encrypted)
         let data = JSON.parse(decrypted)
         this.username = data.username
+        this.avatar = require(`../assets/avatars/${data.avatar}`)
+        this.email = data.email
       }
       let encryptedRoom = localStorage.getItem('roomInfo')
       if (encryptedRoom) {
-        class Member {
-          constructor (name, avatar, wish, secretSanta) {
-            this.name = name
-            this.avatar = avatar
-            this.wish = wish
-            this.secretSanta = secretSanta
-          }
-        }
         encryptedRoom = encryptedRoom.replace(/\s/g, '')
         let decryptedRoom = decodeURIComponent(escape(atob(encryptedRoom)))
         let roomInfo = JSON.parse(decryptedRoom)
-        this.roomName = roomInfo.roomName
-        this.roomId = roomInfo.roomId
-        this.budget = roomInfo.budget
-        this.announceDate = roomInfo.deadline
-        this.members = roomInfo.members.map(m => {
-          return new Member(m.username, m.avatar, m.wish, m.santa)
-        })
-        this.background = require(`../assets/backgrounds/${roomInfo.background}`)
+        this.parseLoadedData(roomInfo)
       }
     },
     computeInterval (interval) {
