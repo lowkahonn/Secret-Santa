@@ -63,19 +63,15 @@
     <v-row align="center" justify="center" class="info-board">
       <v-col>
         <div class="col">
-          <h3>Invite friends with this code:&nbsp;
-            <span id="roomId" class="room-id">{{ roomId }}</span>
-            <v-btn small @click="copyRoomCode()" outlined>Copy</v-btn>
-          </h3>
-        </div>
-        <div class="col">
           <v-row justify="center" align="center">
             <img class="icon" src="../assets/budget.png">
             <h3>&nbsp; Budget: {{budget}}</h3>
           </v-row>
         </div>
         <div class="col">
-          <button @click="toggleEditWish()" class="btn-group">Edit Wish</button>
+          <button @click="toggleEditWish()" class="btn-group">Edit Wish</button><br>
+          <button @click="copyUrl()" class="btn-group">Share Link</button>
+          <h3 v-if="isCopied" class="msg-copy">&nbsp;Link copied!</h3><br>
           <button @click="back()" class="btn-group">Back to Profile</button>
         </div>
       </v-col>
@@ -92,8 +88,10 @@
             label="Enter your wish"
             type="text"
             @click:append-outer="updateWish()"
-            @click:clear="clearMessage()"
-          ></v-text-field>
+            @click:clear="clearWish()"
+        >
+        </v-text-field>
+        <p v-if="showUpdateError" class="error-msg">Please try again</p>
         <v-btn @click="toggleEditWish()" class="btn-group">Back</v-btn>
       </div>
     </div>
@@ -104,7 +102,7 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Room',
-  props: ['roomInfoProp'],
+  props: ['usernameProp', 'roomInfoProp'],
   data () {
     return {
       selectedKey: null,
@@ -127,10 +125,10 @@ export default {
       interval: null,
       hash: '',
       isActive: false,
-      editWish: false
+      editWish: false,
+      isCopied: false,
+      showUpdateError: false
     }
-  },
-  created () {
   },
   async mounted () {
     this.$nextTick(() => {
@@ -206,6 +204,7 @@ export default {
           this.secretSanta = secretSanta
         }
       }
+      this.username = this.usernameProp
       this.roomName = roomInfo.roomName
       this.roomId = roomInfo.roomId
       this.budget = roomInfo.budget
@@ -249,13 +248,27 @@ export default {
       this.countdownMin = ((interval % (3600 * 24)) % 3600) / 60 | 0
       this.countdownSec = (((interval % (3600 * 24)) % 3600) % 60) | 0
     },
-    copyRoomCode () {
-      var r = document.createRange()
-      r.selectNode(document.getElementById('roomId'))
-      window.getSelection().removeAllRanges()
-      window.getSelection().addRange(r)
+    copyUrl () {
+      if (!window.getSelection) {
+        alert('Please copy the URL from the location bar.')
+        return
+      }
+      const dummy = document.createElement('p')
+      dummy.textContent = window.location.href + '#' + this.roomId
+      document.body.appendChild(dummy)
+
+      const range = document.createRange()
+      range.setStartBefore(dummy)
+      range.setEndAfter(dummy)
+
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+
       document.execCommand('copy')
-      window.getSelection().removeAllRanges()
+      document.body.removeChild(dummy)
+      this.isCopied = true
+      setTimeout(() => { this.isCopied = false }, 1000)
     },
     async updateWish () {
       if (this.members[this.username]) {
@@ -268,7 +281,18 @@ export default {
         wish: this.wish
       }
 
-      await ApiService.updateWish(data)
+      let res = await ApiService.updateWish(data)
+
+      if (res) {
+        this.showUpdateError = false
+        this.editWish = false
+      } else {
+        this.showUpdateError = true
+        setTimeout(() => { this.showUpdateError = false }, 1000)
+      }
+    },
+    clearWish () {
+      this.wish = ''
     },
     getAvatarSize () {
       if (screen.width < 235 || screen.height < 435) return 50
@@ -377,14 +401,17 @@ export default {
   text-align: center;
 }
 
-.room-id {
-  background-color: palegoldenrod;
-  padding: 5px 5px;
-  border-radius: 5px;
-}
-
 .icon {
   width: 50px;
+}
+
+.msg-copy {
+  font-weight: bold;
+  font-size: 0.6rem;
+}
+
+.error-msg {
+  color: rgba(206, 29, 29, 0.87);
 }
 
 .countdown {
@@ -414,6 +441,7 @@ export default {
 .btn-group {
   border-radius: 10px;
   padding: 10px 10px;
+  margin: 5px 5px;
   background-color: white;
   font-weight: bold;
 }
