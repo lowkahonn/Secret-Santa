@@ -21,6 +21,9 @@ const ApiService = {
   checkRoomValid (roomId) {
     if (!roomId || roomId === '') return false
     return axios.get(`room/check?roomId=${roomId}`)
+  },
+  updateWish (params) {
+    return axios.post('room/updateWish', params)
   }
 }
 

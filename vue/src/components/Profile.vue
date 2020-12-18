@@ -136,6 +136,7 @@ export default {
         this.$router.push({
           name: 'Room',
           params: {
+            usernameProp: this.username,
             roomInfoProp: res.data.roomInfo
           }
         })
@@ -251,6 +252,7 @@ export default {
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   text-align: center;
+  overflow-y: auto;
 }
 
 .table {

@@ -7,7 +7,6 @@
     <p class="countdown">Time Remaining<br>{{ countdownDay }} days {{ countdownHour }} hours {{ countdownMin }} mins {{ countdownSec }} secs</p>
     <v-row justify="center">
       <v-slide-group
-        v-model="selectedIndex"
         class="pa-4"
         center-active
         show-arrows
@@ -15,29 +14,28 @@
         next-icon="mdi-arrow-right-drop-circle"
       >
         <v-slide-item
-          v-for="(m, index) in members"
+          v-for="(key, index) in Object.keys(members)"
           :key="index"
           active-class="border"
-          v-slot="{ active, toggle }"
         >
           <div>
             <v-avatar
-              :color="active ? 'primary' : 'grey lighten-1'"
+              :color="isActive ? 'primary' : 'grey lighten-1'"
               class="avatar"
               :size="avatarSize"
-              @click="toggle"
+              @click="toggleAvatar(key)"
             >
               <img
-                :src="getImgURL(m.avatar)"
-                :alt="getShortName(m.name)"
+                :src="getImgURL(members[key].avatar)"
+                :alt="getShortName(members[key].name)"
               >
             </v-avatar>
             <v-sheet
-             :color="m.secretSanta == username ? 'red lighten-1' : 'lunarblush lighten-1'"
+             :color="members[key].secretSanta == username ? 'red lighten-1' : 'lunarblush lighten-1'"
              class="avatar-name"
-             @click="toggle"
+             @click="toggleAvatar(key)"
             >
-              {{getShortName(m.name)}}
+              {{getShortName(members[key].name)}}
             </v-sheet>
           </div>
         </v-slide-item>
@@ -46,7 +44,7 @@
     <div class="info">
       <v-expand-transition>
         <v-sheet
-          v-if="selectedIndex != null"
+          v-if="isActive"
           height="50"
           rounded
         >
@@ -56,10 +54,7 @@
             justify="center"
           >
             <h3 class="title">
-              {{members[selectedIndex].name}}
-            </h3>
-            <h3 v-if="members[selectedIndex].secretSanta == username" class="title">
-              &nbsp;want a {{members[selectedIndex].wish}} !
+              {{members[selectedKey].name}} want a {{members[selectedKey].wish}} !
             </h3>
           </v-row>
         </v-sheet>
@@ -80,10 +75,28 @@
           </v-row>
         </div>
         <div class="col">
+          <button @click="toggleEditWish()" class="btn-group">Edit Wish</button>
           <button @click="back()" class="btn-group">Back to Profile</button>
         </div>
       </v-col>
     </v-row>
+    <div v-if="editWish" class="overlay">
+      <div class="table">
+        <v-text-field
+            v-model="wish"
+            prepend-icon="mdi-gift"
+            append-outer-icon="mdi-checkbox-marked"
+            solo
+            clear-icon="mdi-close-circle"
+            clearable
+            label="Enter your wish"
+            type="text"
+            @click:append-outer="updateWish()"
+            @click:clear="clearMessage()"
+          ></v-text-field>
+        <v-btn @click="toggleEditWish()" class="btn-group">Back</v-btn>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -94,11 +107,12 @@ export default {
   props: ['roomInfoProp'],
   data () {
     return {
-      selectedIndex: null,
+      selectedKey: null,
       username: '',
       avatar: '',
       roomName: '',
       email: '',
+      wish: '',
       roomId: 0,
       budget: 0,
       announceDate: '',
@@ -111,7 +125,9 @@ export default {
       countdownSec: 0,
       countdown: 0,
       interval: null,
-      hash: ''
+      hash: '',
+      isActive: false,
+      editWish: false
     }
   },
   created () {
@@ -194,9 +210,16 @@ export default {
       this.roomId = roomInfo.roomId
       this.budget = roomInfo.budget
       this.announceDate = roomInfo.deadline
-      this.members = roomInfo.members.map(m => {
-        return new Member(m.username, m.avatar, m.wish, m.santa)
-      })
+      this.members = Object.assign(
+        {},
+        ...roomInfo.members.map((m) => ({
+          [m.username]: new Member(m.username, m.avatar, m.wish, m.santa)
+        }))
+      )
+      this.wish = this.members[this.username] ? this.members[this.username].wish : ''
+      if (!this.wish || this.wish === '') {
+        this.editWish = true
+      }
       this.background = require(`../assets/backgrounds/${roomInfo.background}`)
     },
     loadFromStorage () {
@@ -207,6 +230,10 @@ export default {
         this.username = data.username
         this.avatar = require(`../assets/avatars/${data.avatar}`)
         this.email = data.email
+        this.wish = this.members[this.username] ? this.members[this.username].wish : ''
+        if (!this.wish || this.wish === '') {
+          this.editWish = true
+        }
       }
       let encryptedRoom = localStorage.getItem('roomInfo')
       if (encryptedRoom) {
@@ -230,6 +257,19 @@ export default {
       document.execCommand('copy')
       window.getSelection().removeAllRanges()
     },
+    async updateWish () {
+      if (this.members[this.username]) {
+        this.members[this.username].wish = this.wish
+      }
+
+      let data = {
+        username: this.username,
+        roomId: this.roomId,
+        wish: this.wish
+      }
+
+      await ApiService.updateWish(data)
+    },
     getAvatarSize () {
       if (screen.width < 235 || screen.height < 435) return 50
       else if ((screen.width >= 235 && screen.width <= 382) || screen.height < 575) return 70
@@ -244,6 +284,13 @@ export default {
     },
     onResize () {
       this.avatarSize = this.getAvatarSize()
+    },
+    toggleEditWish () {
+      this.editWish = !this.editWish
+    },
+    toggleAvatar (key) {
+      this.isActive = !this.isActive
+      this.selectedKey = key
     },
     back () {
       if (this.interval != null) {
@@ -299,6 +346,35 @@ export default {
   margin: 5px auto;
   border-radius: 20px;
   border: 5px solid rgb(133, 68, 7);
+}
+
+.overlay {
+  background-color: rgba(0,0,0,0.5);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  overflow-y: auto;
+}
+
+.table {
+  background-color: rgb(224, 153, 106);
+  border-radius: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 50px 50px;
+  max-width: 500px;
+  width: 80%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
 .room-id {
