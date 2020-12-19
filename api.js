@@ -1,4 +1,5 @@
 const express = require('express')
+const db = require('./services/db/db.service')
 const history = require('connect-history-api-fallback')
 const registrationRouter = require('./routes/registration.router')
 const loginRouter = require('./routes/login.router')
@@ -23,6 +24,7 @@ app.use('/room', roomRouter)
 // // Support history api 
 app.use(history()); 
 let port = process.env.PORT || 3000
-app.listen(port, function () {
+app.listen(port, async function () {
+    await db.init();
     console.log(`Secret Santa app listening on port ${port}!`);
 });

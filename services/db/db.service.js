@@ -100,6 +100,28 @@ const DatabaseService = {
             'background VARCHAR(32) NOT NULL' +
         ')')
         await client.query('CREATE SCHEMA IF NOT EXISTS room')
+        let q = await query(ROOMS_TABLE, ROOMS_TABLE_QUERY_FIELDS)
+        if (q.rows && q.rows.length) {
+            let self = this
+            let now = new Date()
+            q.rows.forEach((row, _) => {
+                let date = new Date(row.timezone)
+                if (date.getTime() - now.getTime() > 0) {
+                    console.log(`[DatabaseService] Scheduling job at ${date}`)
+                    scheduleJob(date, async function () {
+                        let users = await self.getAllUsersInRoom(row.room_id, row.organizer)
+                        if (users.length) {
+                            let shuffledUsers = await Mailer.sendMail(users, row)
+                            for (var i = 0; i < shuffledUsers.length; i++) {
+                                let user = shuffledUsers[(i + 1) % shuffledUsers.length]
+                                let santa = shuffledUsers[i]
+                                await update(getRoomTable(row.room_id), [`santa = '${santa.username}'`], `username = '${user.username}'`)
+                            }
+                        }
+                    })
+                }
+            })
+        }
         inited = true
     },
     async getUser(username) {
