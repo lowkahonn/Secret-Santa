@@ -28,7 +28,7 @@
       <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Join a Party</v-btn>
     </div>
     <div v-else class="join">
-            <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
+      <v-btn @click="join()" class="btn-group" color="primary" rounded>Join</v-btn>
       <v-btn @click="toggleJoinParty()" class="btn-group" color="primary" rounded>Back</v-btn>
       <br/>
       <v-btn @click="toggleShowRoom()" class="btn-group" color="primary" rounded>Join My Rooms</v-btn>
@@ -163,6 +163,7 @@ export default {
     },
     logOut () {
       localStorage.removeItem('data')
+      localStorage.removeItem('roomInfo')
       this.$router.push({name: 'Home'})
     }
   },

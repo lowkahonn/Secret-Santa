@@ -33,9 +33,11 @@
             <v-sheet
              :color="members[key].secretSanta === username ? 'red lighten-1' : 'lunarblush lighten-1'"
              class="avatar-name"
+             elevation="1"
+             :max-width="avatarSize * 0.75"
              @click="toggleAvatar(key)"
             >
-              {{getShortName(members[key].name)}}
+              {{members[key].name}}
             </v-sheet>
           </div>
         </v-slide-item>
@@ -49,12 +51,13 @@
           rounded
         >
           <v-row
+            v-if="members[selectedKey].wish && members[selectedKey].wish !== ''"
             class="fill-height"
             align="center"
             justify="center"
           >
             <h3 class="title">
-              {{members[selectedKey].name}} want a {{members[selectedKey].wish}} !
+              {{members[selectedKey].name}}'s wish: {{members[selectedKey].wish}}
             </h3>
           </v-row>
         </v-sheet>
@@ -424,7 +427,7 @@ export default {
 }
 
 .avatar-name {
-  max-width: 50px;
+  overflow: hidden;
   margin: 0 auto;
   border-radius: 10px;
   font-weight: bold;

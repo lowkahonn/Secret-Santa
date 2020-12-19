@@ -22,6 +22,7 @@ app.use('/room', roomRouter)
 
 // // Support history api 
 app.use(history()); 
-app.listen(process.env.PORT || 3000, function () {
-    console.log('Example app listening on port 3000!');
+let port = process.env.PORT || 3000
+app.listen(port, function () {
+    console.log(`Secret Santa app listening on port ${port}!`);
 });
