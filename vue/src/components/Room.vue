@@ -224,6 +224,8 @@ export default {
       this.wish = this.members[this.username] ? this.members[this.username].wish : ''
       if (!this.wish || this.wish === '') {
         this.editWish = true
+      } else {
+        this.editWish = false
       }
       this.background = require(`../assets/backgrounds/${roomInfo.background}`)
     },
