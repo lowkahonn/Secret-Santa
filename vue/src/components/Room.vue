@@ -357,7 +357,7 @@ export default {
   -o-background-size: cover;
   background-size: cover;
   align-items: center;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .container {

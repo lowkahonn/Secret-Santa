@@ -109,11 +109,13 @@ export default {
         password: data.password
       })
       if (res.data && res.data.result) {
-        this.username = res.data.user.username
-        this.email = res.data.user.email
-        this.joinedRooms = res.data.user.rooms
-        this.avatar = require(`../assets/avatars/${res.data.user.avatar}`)
-        let parsed = JSON.stringify(res.data.user)
+        let user = res.data.user
+        this.username = user.username
+        this.email = user.email
+        this.joinedRooms = user.rooms
+        this.avatar = require(`../assets/avatars/${user.avatar}`)
+        user.password = data.password
+        let parsed = JSON.stringify(user)
         let encrypted = btoa(unescape(encodeURIComponent(parsed)))
         localStorage.setItem('data', encrypted)
       }
