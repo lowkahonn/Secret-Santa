@@ -48,22 +48,28 @@ class Mailer {
         users = shuffle(users)
         let subject = `We've drawn a name for you!`
         for (var i = 0; i < users.length; i++) {
-            let user = users[(i + 1) % users.length]
-            let santa = users[i]
-            let html = getHtml(santa, user, roomInfo)
-            let options = {
-                from: process.env.EMAIL_USER,
-                to: santa.email,
-                subject,
-                html,
-                attachments: [{
-                    filename: 'emailheader.png',
-                    path: __dirname + '/emailheader.png',
-                    cid: 'emailheader'
-                }]
+            try {
+                let user = users[(i + 1) % users.length]
+                let santa = users[i]
+                let html = getHtml(santa, user, roomInfo)
+                let options = {
+                    from: process.env.EMAIL_USER,
+                    to: santa.email,
+                    subject,
+                    html,
+                    attachments: [{
+                        filename: 'emailheader.png',
+                        path: __dirname + '/emailheader.png',
+                        cid: 'emailheader'
+                    }]
+                }
+                await transporter.sendMail(options)
+                console.log(`sent to ${santa.email}`)
+            } catch (e) {
+                console.log(e)
+                console.log(`couldn't send to ${santa.email}`)
+                continue
             }
-            await transporter.sendMail(options)
-            console.log(`sent to ${santa.email}`)
         }
         return users
     }

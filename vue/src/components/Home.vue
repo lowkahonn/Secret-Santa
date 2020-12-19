@@ -85,7 +85,8 @@ export default {
       }
       let res = await ApiService.login(data)
       if (res.data && res.data.result) {
-        data.user = res.data.user
+        data.email = res.data.user.email
+        data.avatar = res.data.user.avatar
         this.saveData(data)
         if (this.pendingHash && this.pendingHash !== '') {
           let q = await ApiService.join({

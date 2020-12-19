@@ -46,12 +46,11 @@
     <div class="info">
       <v-expand-transition>
         <v-sheet
-          v-if="isActive"
+          v-if="isActive && members[selectedKey].wish && members[selectedKey].wish !== ''"
           height="50"
           rounded
         >
           <v-row
-            v-if="members[selectedKey].wish && members[selectedKey].wish !== ''"
             class="fill-height"
             align="center"
             justify="center"
@@ -143,6 +142,10 @@ export default {
     if (hash === '') {
       if (!this.roomInfoProp) {
         this.loadFromStorage()
+        if (this.username === '' || this.email === '') {
+          this.$router.push({ name: 'Home' })
+        }
+        await this.joinRoom(this.roomId)
       } else {
         let roomInfo = this.roomInfoProp
         this.parseLoadedData(roomInfo)
@@ -239,9 +242,9 @@ export default {
       if (encrypted) {
         let decrypted = atob(encrypted)
         let data = JSON.parse(decrypted)
-        this.username = data.user.username
-        this.avatar = require(`../assets/avatars/${data.user.avatar}`)
-        this.email = data.user.email
+        this.username = data.username
+        this.avatar = require(`../assets/avatars/${data.avatar}`)
+        this.email = data.email
       }
     },
     computeInterval (interval) {
@@ -256,7 +259,12 @@ export default {
         return
       }
       const dummy = document.createElement('p')
-      dummy.textContent = window.location.href + '#' + this.roomId
+      let hash = window.location.hash
+      if (hash !== '') {
+        dummy.textContent = window.location.href.split(hash)[0] + `#${this.roomId}`
+      } else {
+        dummy.textContent = window.location.href + `#${this.roomId}`
+      }
       document.body.appendChild(dummy)
 
       const range = document.createRange()
@@ -285,7 +293,7 @@ export default {
 
       let res = await ApiService.updateWish(data)
 
-      if (res) {
+      if (res.data && res.data.result) {
         this.showUpdateError = false
         this.editWish = false
       } else {
@@ -315,7 +323,11 @@ export default {
       this.editWish = !this.editWish
     },
     toggleAvatar (key) {
-      this.isActive = !this.isActive
+      if (key === this.selectedKey) {
+        this.isActive = !this.isActive
+      } else {
+        this.isActive = true
+      }
       this.selectedKey = key
     },
     back () {
