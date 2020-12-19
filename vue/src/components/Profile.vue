@@ -190,6 +190,7 @@ export default {
   -o-background-size: cover;
   background-size: cover;
   align-items: center;
+  overflow: scroll;
 }
 
 .header-msg {
