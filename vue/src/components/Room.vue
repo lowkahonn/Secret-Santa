@@ -131,6 +131,7 @@ export default {
     }
   },
   async mounted () {
+    this.loadUserDataFromStorage()
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize)
     })
@@ -140,7 +141,6 @@ export default {
       if (!this.roomInfoProp) {
         this.loadFromStorage()
       } else {
-        this.loadFromStorage()
         let roomInfo = this.roomInfoProp
         this.parseLoadedData(roomInfo)
         await this.joinRoom(this.roomId)
@@ -222,20 +222,23 @@ export default {
       this.background = require(`../assets/backgrounds/${roomInfo.background}`)
     },
     loadFromStorage () {
-      let encrypted = localStorage.getItem('data')
-      if (encrypted) {
-        let decrypted = atob(encrypted)
-        let data = JSON.parse(decrypted)
-        this.username = data.username
-        this.avatar = require(`../assets/avatars/${data.avatar}`)
-        this.email = data.email
-      }
+      this.loadUserDataFromStorage()
       let encryptedRoom = localStorage.getItem('roomInfo')
       if (encryptedRoom) {
         encryptedRoom = encryptedRoom.replace(/\s/g, '')
         let decryptedRoom = decodeURIComponent(escape(atob(encryptedRoom)))
         let roomInfo = JSON.parse(decryptedRoom)
         this.parseLoadedData(roomInfo)
+      }
+    },
+    loadUserDataFromStorage () {
+      let encrypted = localStorage.getItem('data')
+      if (encrypted) {
+        let decrypted = atob(encrypted)
+        let data = JSON.parse(decrypted)
+        this.username = data.user.username
+        this.avatar = require(`../assets/avatars/${data.user.avatar}`)
+        this.email = data.user.email
       }
     },
     computeInterval (interval) {
