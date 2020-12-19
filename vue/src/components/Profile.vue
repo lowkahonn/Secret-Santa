@@ -156,10 +156,10 @@ export default {
     onResize () {
       this.avatarSize = this.getAvatarSize()
     },
-    joinSelectedRoom () {
+    async joinSelectedRoom () {
       if (this.selectedIndex == null) return
       this.roomId = this.joinedRooms[this.selectedIndex].roomId
-      this.join()
+      await this.join()
     },
     logOut () {
       localStorage.removeItem('data')
