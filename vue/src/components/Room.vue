@@ -20,7 +20,7 @@
         >
           <div>
             <v-avatar
-              :color="isActive ? 'primary' : 'grey lighten-1'"
+              :color="key === selectedKey ? 'primary' : 'grey lighten-1'"
               class="avatar"
               :size="avatarSize"
               @click="toggleAvatar(key)"
@@ -31,7 +31,7 @@
               >
             </v-avatar>
             <v-sheet
-             :color="members[key].secretSanta == username ? 'red lighten-1' : 'lunarblush lighten-1'"
+             :color="members[key].secretSanta === username ? 'red lighten-1' : 'lunarblush lighten-1'"
              class="avatar-name"
              @click="toggleAvatar(key)"
             >
@@ -102,7 +102,7 @@
 import ApiService from '@/api/api.service'
 export default {
   name: 'Room',
-  props: ['usernameProp', 'roomInfoProp'],
+  props: ['roomInfoProp'],
   data () {
     return {
       selectedKey: null,
@@ -140,6 +140,7 @@ export default {
       if (!this.roomInfoProp) {
         this.loadFromStorage()
       } else {
+        this.loadFromStorage()
         let roomInfo = this.roomInfoProp
         this.parseLoadedData(roomInfo)
         await this.joinRoom(this.roomId)
@@ -204,7 +205,6 @@ export default {
           this.secretSanta = secretSanta
         }
       }
-      this.username = this.usernameProp
       this.roomName = roomInfo.roomName
       this.roomId = roomInfo.roomId
       this.budget = roomInfo.budget
@@ -229,10 +229,6 @@ export default {
         this.username = data.username
         this.avatar = require(`../assets/avatars/${data.avatar}`)
         this.email = data.email
-        this.wish = this.members[this.username] ? this.members[this.username].wish : ''
-        if (!this.wish || this.wish === '') {
-          this.editWish = true
-        }
       }
       let encryptedRoom = localStorage.getItem('roomInfo')
       if (encryptedRoom) {
